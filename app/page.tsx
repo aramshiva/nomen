@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { motion } from "motion/react";
+import Chart from "@/components/chart";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -163,6 +164,9 @@ export default function Page() {
         </div>
       </div>
 
+      <div className="pt-5 px-9 pb-5">
+        <Chart name={name} sex={sex} />
+      </div>
       <div className="flex-1 overflow-auto p-4">
         {data.length > 0 ? (
           <div className="container mx-auto">

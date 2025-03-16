@@ -14,3 +14,7 @@ export const namesbyarea = mysqlTable("namesbyarea", {
   year: int("year").notNull().default(0),
   state: char("state", { length: 2 }).notNull().default(""),
 });
+
+export const uniquenames = mysqlTable("uniquenames", {
+  name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
+});
