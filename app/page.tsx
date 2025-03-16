@@ -62,7 +62,7 @@ export default function Page() {
             <p className="text-gray-500 text-sm pb-5">
               A parser for every name listed on a social security card between
               1880-2023, tabulated from the United States Social Security
-              Adminstration's data.
+              Adminstration{"'"}s data.
             </p>
             <div className="flex flex-col space-y-5">
               <motion.div
