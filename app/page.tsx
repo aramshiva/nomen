@@ -118,7 +118,7 @@ export default function Page() {
 
   return (
     <div className={inter.className + " min-h-screen flex flex-col"}>
-      <div className="border-b p-4 bg-white shadow-sm">
+      <div className="border-b p-4 bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto flex flex-col md:flex-row items-center gap-4">
           <motion.p className="font-bold mr-4" layoutId="title">
             Names
@@ -168,7 +168,7 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="pt-5 px-9 pb-5">
+      <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3">
         <Chart name={submittedName} sex={submittedSex} />
       </div>
       <div className="flex-1 overflow-auto p-4">
