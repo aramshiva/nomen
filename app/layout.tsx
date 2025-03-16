@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Names",
+  title: "Nomen",
   description:
     "A parser for every name listed on a social security card between 1880-2023, tabulated from the United States Social Security Adminstration's data.",
 };
