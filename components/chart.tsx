@@ -179,9 +179,9 @@ export default function Chart({ name, sex }: ChartProps) {
                 content={
                   <ChartTooltipContent
                     indicator="dot"
-                    formatter={(value) => [
+                    formatter={(value, name, props) => [
                       `${value}`,
-                      " people were born this year.",
+                      ` people were born in ${props.payload.year}`,
                     ]}
                   />
                 }

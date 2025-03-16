@@ -63,7 +63,7 @@ export default function Page() {
       <div className={inter.className}>
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
           <div className="w-[30rem] max-w-full">
-            <motion.p className="font-bold text-xl">Names</motion.p>
+            <motion.p className="font-bold text-xl">Nomen</motion.p>
             <p className="text-gray-500 text-sm pb-5">
               A parser for every name listed on a social security card between
               1880-2023, tabulated from the United States Social Security
@@ -121,7 +121,7 @@ export default function Page() {
       <div className="border-b p-4 bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto flex flex-col md:flex-row items-center gap-4">
           <motion.p className="font-bold mr-4" layoutId="title">
-            Names
+            Nomen
           </motion.p>
           <div className="flex-1 flex flex-col md:flex-row gap-4 items-center">
             <motion.div className="w-full" layoutId="name-input-container">
