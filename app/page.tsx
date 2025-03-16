@@ -37,6 +37,8 @@ export default function Page() {
   const [data, setData] = useState<NameData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
+  const [submittedSex, setSubmittedSex] = useState("");
 
   const handleSearch = async () => {
     if (!name || !sex) return;
@@ -47,6 +49,8 @@ export default function Page() {
       const result = await response.json();
       setData(result);
       setHasSearched(true);
+      setSubmittedName(name);
+      setSubmittedSex(sex);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -165,7 +169,7 @@ export default function Page() {
       </div>
 
       <div className="pt-5 px-9 pb-5">
-        <Chart name={name} sex={sex} />
+        <Chart name={submittedName} sex={submittedSex} />
       </div>
       <div className="flex-1 overflow-auto p-4">
         {data.length > 0 ? (
