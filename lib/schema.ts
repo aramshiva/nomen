@@ -1,11 +1,4 @@
-import {
-  mysqlTable,
-  varchar,
-  char,
-  mysqlEnum,
-  int,
-} from "drizzle-orm/mysql-core";
-import { sql } from "drizzle-orm";
+import { mysqlTable, varchar, char, int } from "drizzle-orm/mysql-core";
 
 export const names = mysqlTable("names", {
   name: varchar("name", { length: 255 }).notNull().primaryKey().default(""),
