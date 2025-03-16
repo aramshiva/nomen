@@ -1,101 +1,200 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Inter } from "next/font/google";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useState } from "react";
+import { motion } from "motion/react";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+const inter = Inter({ subsets: ["latin"] });
+
+interface NameData {
+  name: string;
+  sex: string;
+  amount: number;
+  year: number;
+}
+
+export default function Page() {
+  const [name, setName] = useState("");
+  const [sex, setSex] = useState("");
+  const [data, setData] = useState<NameData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleSearch = async () => {
+    if (!name || !sex) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/names?name=${name}&sex=${sex}`);
+      const result = await response.json();
+      setData(result);
+      setHasSearched(true);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!hasSearched) {
+    return (
+      <div className={inter.className}>
+        <div className="flex flex-col items-center justify-center min-h-screen p-6">
+          <div className="w-[30rem] max-w-full">
+            <motion.p className="font-bold text-xl">Names</motion.p>
+            <p className="text-gray-500 text-sm pb-5">
+              A parser for every name listed on a social security card between
+              1880-2023, tabulated from the United States Social Security
+              Adminstration's data.
+            </p>
+            <div className="flex flex-col space-y-5">
+              <motion.div
+                className="flex flex-col space-y-2"
+                layoutId="name-input-container"
+              >
+                <p>First Name:</p>
+                <motion.div layoutId="name-input">
+                  <Input
+                    type="text"
+                    placeholder="Enter a name"
+                    className="w-full"
+                    aria-label="Name search"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </motion.div>
+              </motion.div>
+              <motion.div className="" layoutId="sex-select-container">
+                <p>Sex:</p>
+                <motion.div layoutId="sex-select">
+                  <Select value={sex} onValueChange={setSex}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </motion.div>
+              </motion.div>
+              <motion.div layoutId="search-button">
+                <Button
+                  onClick={handleSearch}
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? "Searching..." : "Search the database!"}
+                </Button>
+              </motion.div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className={inter.className + " min-h-screen flex flex-col"}>
+      <div className="border-b p-4 bg-white shadow-sm">
+        <div className="container mx-auto flex flex-col md:flex-row items-center gap-4">
+          <motion.p className="font-bold mr-4" layoutId="title">
+            Names
+          </motion.p>
+          <div className="flex-1 flex flex-col md:flex-row gap-4 items-center">
+            <motion.div className="w-full" layoutId="name-input-container">
+              <motion.div layoutId="name-input">
+                <Input
+                  type="text"
+                  placeholder="Enter a name"
+                  aria-label="Name search"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </motion.div>
+            </motion.div>
+            <motion.div
+              className="w-full md:w-40"
+              layoutId="sex-select-container"
+            >
+              <motion.div layoutId="sex-select">
+                <Select value={sex} onValueChange={setSex}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="M">Male</SelectItem>
+                    <SelectItem value="F">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </motion.div>
+            </motion.div>
+            <motion.div layoutId="search-button">
+              <Button onClick={handleSearch} disabled={isLoading}>
+                <motion.span
+                  key={isLoading ? "loading" : "idle"}
+                  initial={{ opacity: 0, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, filter: "blur(4px)" }}
+                  transition={{ duration: 0.6 }}
+                >
+                  {isLoading ? "Searching..." : "Search"}
+                </motion.span>
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto p-4">
+        {data.length > 0 ? (
+          <div className="container mx-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-white">
+                <TableRow>
+                  <TableHead className="w-[100px]">Name</TableHead>
+                  <TableHead>Sex</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead className="text-right">Year</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>{item.sex}</TableCell>
+                    <TableCell>
+                      {item.amount <= 5 ? "<5" : item.amount}
+                    </TableCell>
+                    <TableCell className="text-right">{item.year}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <p className="text-gray-500">No results found</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

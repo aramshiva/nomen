@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1742105010238,
+      "tag": "0000_glossy_hellcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1742105981421,
+      "tag": "0001_freezing_korath",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1742106314107,
+      "tag": "0002_daffy_tarot",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1742106577669,
+      "tag": "0003_hot_garia",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1742106696119,
+      "tag": "0004_perpetual_mauler",
+      "breakpoints": true
+    }
+  ]
+}
