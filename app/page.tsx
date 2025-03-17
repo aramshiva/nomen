@@ -33,10 +33,14 @@ interface NameData {
 }
 
 export default function Page() {
-  const searchParams = useSearchParams();
+  const SearchParamsWrapper = () => {
+    const searchParams = useSearchParams();
+    return searchParams;
+  };
+  
+  const searchParams = SearchParamsWrapper();
   const urlName = searchParams.get("name");
   const urlSex = searchParams.get("sex");
-
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
   const [data, setData] = useState<NameData[]>([]);
