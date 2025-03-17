@@ -18,9 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Chart from "@/components/chart";
+import { useSearchParams } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,8 +33,12 @@ interface NameData {
 }
 
 export default function Page() {
-  const [name, setName] = useState("");
-  const [sex, setSex] = useState("");
+  const searchParams = useSearchParams();
+  const urlName = searchParams.get("name");
+  const urlSex = searchParams.get("sex");
+
+  const [name, setName] = useState(urlName || "");
+  const [sex, setSex] = useState(urlSex || "");
   const [data, setData] = useState<NameData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -57,6 +62,12 @@ export default function Page() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (urlName && urlSex) {
+      handleSearch();
+    }
+  }, []);
 
   if (!hasSearched) {
     return (
@@ -109,6 +120,11 @@ export default function Page() {
                   {isLoading ? "Searching..." : "Search the database!"}
                 </Button>
               </motion.div>
+              {/* <div className="items-center text-center text-sm text-gray-600">
+                <Link href="/popular" className="underline">
+                  Popular Names
+                </Link>
+              </div> */}
             </div>
           </div>
         </div>
