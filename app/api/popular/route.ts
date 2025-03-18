@@ -26,18 +26,18 @@ export async function GET(request: NextRequest) {
             conditions.push(eq(names.sex, sex));
         }
 
-        let query = db
+        const baseQuery = db
             .select({
                 name: names.name,
                 total: sql`SUM(${names.amount})`.as('total')
             })
             .from(names);
             
-        if (conditions.length > 0) {
-            query = query.where(and(...conditions));
-        }
+        const queryWithConditions = conditions.length > 0
+            ? baseQuery.where(and(...conditions))
+            : baseQuery;
 
-        query = query
+        const finalQuery = queryWithConditions
             .groupBy(names.name)
             .orderBy(desc(sql`total`))
             .limit(500);
