@@ -21,6 +21,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TopBar } from "@/components/top-bar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -105,58 +106,44 @@ export default function PopularNamesPage() {
 
   return (
     <div className={inter.className + " min-h-screen flex flex-col"}>
-      <div className="border-b p-4 bg-white shadow-sm dark:bg-gray-950 dark:border-gray-800 sticky top-0 z-10">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center">
-            <Link href="/">
-              <motion.p
-                className="font-bold mr-4 cursor-pointer"
-                layoutId="title"
-              >
-                Nomen
-              </motion.p>
-            </Link>
-            <h1 className="text-sm font-semibold">Most Popular Names</h1>
+      <TopBar title="Most Popular Names">
+        <div className="flex items-center gap-4">
+          <div className="w-40">
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select year" />
+              </SelectTrigger>
+              <SelectContent>
+                {yearOptions.map((y) => (
+                  <SelectItem key={y} value={y}>
+                    {y === "all" ? "All Time" : y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-40">
-              <Select value={year} onValueChange={setYear}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {yearOptions.map((y) => (
-                    <SelectItem key={y} value={y}>
-                      {y === "all" ? "All Time" : y}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-40">
-              <Select value={sex} onValueChange={setSex}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sex" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="M">Male</SelectItem>
-                  <SelectItem value="F">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <ThemeToggle />
-            <Link href="/">
-              <Button variant="outline">Back to Search</Button>
-            </Link>
+          <div className="w-40">
+            <Select value={sex} onValueChange={setSex}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select sex" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="M">Male</SelectItem>
+                <SelectItem value="F">Female</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <Link href="/">
+            <Button variant="secondary">Back to Search</Button>
+          </Link>
         </div>
-      </div>
+      </TopBar>
 
       <div className="flex-1 overflow-auto p-4">
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
-            <p className="text-gray-500">Loading popular names...</p>
+            <p className="text-muted-foreground">Loading popular names...</p>
           </div>
         ) : data.length > 0 ? (
           <div className="container mx-auto">
@@ -165,7 +152,7 @@ export default function PopularNamesPage() {
               {sex === "M" ? "Male" : sex === "F" ? "Female" : ""} Names
             </h2>
             <Table>
-              <TableHeader className="sticky top-0 bg-white dark:bg-gray-950">
+              <TableHeader className="sticky top-0 bg-background">
                 <TableRow>
                   <TableHead className="w-[80px]">Rank</TableHead>
                   <TableHead>Name</TableHead>
@@ -185,7 +172,7 @@ export default function PopularNamesPage() {
                     <TableCell className="font-medium">
                       <Link
                         href={`/?name=${item.name}&sex=${item.sex}`}
-                        className="hover:underline text-blue-600 dark:text-blue-400"
+                        className="hover:underline text-primary"
                       >
                         {item.name}
                       </Link>
@@ -206,7 +193,7 @@ export default function PopularNamesPage() {
           </div>
         ) : (
           <div className="h-full flex items-center justify-center">
-            <p className="text-gray-500">No popular names found</p>
+            <p className="text-muted-foreground">No popular names found</p>
           </div>
         )}
       </div>
