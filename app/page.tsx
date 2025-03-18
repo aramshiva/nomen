@@ -65,9 +65,12 @@ export default function Page() {
 
   useEffect(() => {
     if (urlName && urlSex) {
+      setName(urlName);
+      setSex(urlSex);
       handleSearch();
+      setHasSearched(true);
     }
-  }, []);
+  }, [urlName, urlSex]);
 
   if (!hasSearched) {
     return (
@@ -204,9 +207,7 @@ export default function Page() {
                   <TableRow key={index}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.sex}</TableCell>
-                    <TableCell>
-                      {item.amount}
-                    </TableCell>
+                    <TableCell>{item.amount}</TableCell>
                     <TableCell className="text-right">{item.year}</TableCell>
                   </TableRow>
                 ))}
