@@ -34,12 +34,7 @@ interface NameData {
 }
 
 export default function Page() {
-  const SearchParamsWrapper = () => {
-    const searchParams = useSearchParams();
-    return searchParams;
-  };
-
-  const searchParams = SearchParamsWrapper();
+  const searchParams = useSearchParams();
   const urlName = searchParams.get("name");
   const urlSex = searchParams.get("sex");
   const [name, setName] = useState(urlName || "");
