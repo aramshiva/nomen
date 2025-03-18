@@ -36,7 +36,13 @@ interface NameData {
 function Search() {
   const searchParams = useSearchParams();
   const urlName = searchParams.get("name");
-  const urlSex = searchParams.get("sex");
+  const urlSex =
+    searchParams.get("sex")?.toUpperCase() ||
+    (searchParams.get("sex")?.toLowerCase() === "male"
+      ? "M"
+      : searchParams.get("sex")?.toLowerCase() === "female"
+        ? "F"
+        : "");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
   const [data, setData] = useState<NameData[]>([]);
@@ -68,7 +74,6 @@ function Search() {
       setName(urlName);
       setSex(urlSex);
       handleSearch();
-      setHasSearched(true);
     }
   }, [urlName, urlSex]);
 
@@ -242,4 +247,3 @@ export default function Page() {
     </Suspense>
   );
 }
-
