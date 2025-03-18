@@ -36,6 +36,13 @@
       "when": 1742106696119,
       "tag": "0004_perpetual_mauler",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1742279494303,
+      "tag": "0005_lazy_strong_guy",
+      "breakpoints": true
     }
   ]
 }
