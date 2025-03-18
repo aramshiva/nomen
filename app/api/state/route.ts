@@ -17,20 +17,20 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        let conditions = eq(namesbyarea.name, name);
+        const conditions = [eq(namesbyarea.name, name)];
         
         if (sex) {
-            conditions = and(conditions, eq(namesbyarea.sex, sex));
+            conditions.push(eq(namesbyarea.sex, sex));
         }
         
         if (state) {
-            conditions = and(conditions, eq(namesbyarea.state, state));
+            conditions.push(eq(namesbyarea.state, state));
         }
 
         const result = await db
             .select()
             .from(namesbyarea)
-            .where(conditions)
+            .where(and(...conditions))
             .orderBy(asc(namesbyarea.year));
 
         return NextResponse.json(result);
