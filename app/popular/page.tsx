@@ -20,7 +20,6 @@ import {
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
