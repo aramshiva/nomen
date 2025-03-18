@@ -33,10 +33,6 @@ year INT
 
 ### Planned Features (when i get bored again):
 - Add a new column for the state the name was registered/possibly create a new database to store the [state data](https://www.ssa.gov/oact/babynames/limits.html).
-- Create a web interface to search for names and display the data.
-- Graphs! Who doesn't love graphs?
-- An exported db file for those who don't want to set up a MySQL server :D
-
 ### Want to run yourself?
 - Fill in the `.env` (use `.env.example` as a guide)
 - Run `python3 main.py` (this can **take a couple days**, I suggest running it on a [Raspberry Pi](https://www.raspberrypi.com/) with [tmux](https://github.com/tmux/tmux) to run while terminal is closed

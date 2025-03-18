@@ -1,4 +1,4 @@
-# ✍️ Names
+# ✍️ Nomen
 
 > [!NOTE]  
 > This does **not** include any social security numbers. The only data stored is the name, frequency, sex, year born
