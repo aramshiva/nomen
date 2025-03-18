@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         const baseQuery = db
             .select({
                 name: names.name,
+                sex: names.sex,
                 total: sql`SUM(${names.amount})`.as('total')
             })
             .from(names);
@@ -38,8 +39,8 @@ export async function GET(request: NextRequest) {
             : baseQuery;
 
         const finalQuery = queryWithConditions
-            .groupBy(names.name)
-            .orderBy(desc(sql`total`))
+            .groupBy(names.name, names.sex)
+            .orderBy(desc(sql`total`), names.sex)
             .limit(500);
 
         const popularNames = await finalQuery;
