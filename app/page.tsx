@@ -21,6 +21,7 @@ import {
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import Chart from "@/components/chart";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -37,7 +38,7 @@ export default function Page() {
     const searchParams = useSearchParams();
     return searchParams;
   };
-  
+
   const searchParams = SearchParamsWrapper();
   const urlName = searchParams.get("name");
   const urlSex = searchParams.get("sex");
@@ -124,11 +125,11 @@ export default function Page() {
                   {isLoading ? "Searching..." : "Search the database!"}
                 </Button>
               </motion.div>
-              {/* <div className="items-center text-center text-sm text-gray-600">
+              <div className="items-center text-center text-sm text-gray-600">
                 <Link href="/popular" className="underline">
                   Popular Names
                 </Link>
-              </div> */}
+              </div>
             </div>
           </div>
         </div>
@@ -140,9 +141,9 @@ export default function Page() {
     <div className={inter.className + " min-h-screen flex flex-col"}>
       <div className="border-b p-4 bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto flex flex-col md:flex-row items-center gap-4">
-          <motion.p className="font-bold mr-4" layoutId="title">
+          <motion.a className="font-bold mr-4" layoutId="title" href="/">
             Nomen
-          </motion.p>
+          </motion.a>
           <div className="flex-1 flex flex-col md:flex-row gap-4 items-center">
             <motion.div className="w-full" layoutId="name-input-container">
               <motion.div layoutId="name-input">
@@ -209,7 +210,7 @@ export default function Page() {
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.sex}</TableCell>
                     <TableCell>
-                      {item.amount <= 5 ? "<5" : item.amount}
+                      {item.amount}
                     </TableCell>
                     <TableCell className="text-right">{item.year}</TableCell>
                   </TableRow>
