@@ -5,7 +5,7 @@ export const names = mysqlTable("names", {
   sex: char("sex", { length: 1 }).notNull().default(""),
   amount: int("amount").notNull().default(0),
   year: int("year").notNull().default(0),
-});
+}); // default names db
 
 export const namesbyarea = mysqlTable("namesbyarea", {
   name: varchar("name", { length: 255 }).notNull().primaryKey().default(""),
@@ -13,8 +13,14 @@ export const namesbyarea = mysqlTable("namesbyarea", {
   amount: int("amount").notNull().default(0),
   year: int("year").notNull().default(0),
   state: char("state", { length: 2 }).notNull().default(""),
-});
+}); // name db but with a state column
 
 export const uniquenames = mysqlTable("uniquenames", {
   name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
-});
+}); // only names
+
+export const unique_names = mysqlTable("unique_names", {
+  name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
+  amount: int("amount").notNull().default(0),
+  sex: char("sex", { length: 1 }).notNull().default("")
+}); // names with amount

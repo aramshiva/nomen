@@ -54,9 +54,17 @@ export default function PopularNamesPage() {
   const fetchPopularNames = async () => {
     setIsLoading(true);
     try {
-      let apiUrl = `/api/year?year=${year}`;
-      if (sex !== "all") {
-        apiUrl += `&sex=${sex}`;
+      let apiUrl;
+      if (year === "all") {
+        apiUrl = `/api/popular/all`;
+        if (sex !== "all") {
+          apiUrl += `?sex=${sex}`;
+        }
+      } else {
+        apiUrl = `/api/year?year=${year}`;
+        if (sex !== "all") {
+          apiUrl += `&sex=${sex}`;
+        }
       }
 
       const response = await fetch(apiUrl);
@@ -177,7 +185,7 @@ export default function PopularNamesPage() {
                     <TableCell className="font-medium">
                       <Link
                         href={`/?name=${item.name}&sex=${item.sex}`}
-                        className="hover:underline text-blue-600"
+                        className="hover:underline text-blue-600 dark:text-blue-400"
                       >
                         {item.name}
                       </Link>
