@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "motion/react";
 import Chart from "@/components/chart";
 import Link from "next/link";
@@ -33,7 +33,7 @@ interface NameData {
   year: number;
 }
 
-export default function Page() {
+export function Search() {
   const searchParams = useSearchParams();
   const urlName = searchParams.get("name");
   const urlSex = searchParams.get("sex");
@@ -221,5 +221,24 @@ export default function Page() {
         )}
       </div>
     </div>
+  );
+}
+
+function Fallback() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-6">
+      <div className="w-[30rem] max-w-full">
+        <p className="font-bold text-xl">Nomen</p>
+        <p className="text-gray-500 text-sm pb-5">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Fallback />}>
+      <Search />
+    </Suspense>
   );
 }
