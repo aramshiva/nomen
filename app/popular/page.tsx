@@ -33,17 +33,8 @@ interface PopularNameData {
 }
 
 export default function PopularNamesPage() {
-    const SearchParamsWrapper = () => {
-        const searchParams = useSearchParams();
-        return searchParams;
-    };
-
-    const searchParams = SearchParamsWrapper();
-    const urlYear = searchParams.get("year") || "all";
-    const urlSex = searchParams.get("sex") || "all";
-    
-    const [year, setYear] = useState<string>(urlYear);
-    const [sex, setSex] = useState<string>(urlSex);
+    const [year, setYear] = useState<string>("all");
+    const [sex, setSex] = useState<string>("all");
     const [data, setData] = useState<PopularNameData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [yearOptions, setYearOptions] = useState<string[]>([]);
