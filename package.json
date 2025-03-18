@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "drizzle-kit generate:mysql && drizzle-kit push:mysql"
+    "migrate": "drizzle-kit generate && drizzle-kit push"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.6",

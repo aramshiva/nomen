@@ -23,6 +23,7 @@ import { motion } from "motion/react";
 import Chart from "@/components/chart";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import Geo from "@/components/Geo";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,8 +42,8 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-        ? "F"
-        : "");
+      ? "F"
+      : "");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
   const [data, setData] = useState<NameData[]>([]);
@@ -122,7 +123,15 @@ function Search() {
               </motion.div>
               <motion.div layoutId="search-button">
                 <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? "Searching..." : "Search the database!"}
+                  <motion.span
+                    key={isLoading ? "loading" : "idle"}
+                    initial={{ opacity: 0, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, filter: "blur(4px)" }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    {isLoading ? "Searching..." : "Search"}
+                  </motion.span>
                 </Button>
               </motion.div>
               <div className="items-center text-center text-sm text-gray-600">
@@ -194,6 +203,9 @@ function Search() {
 
       <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3">
         <Chart name={submittedName} sex={submittedSex} />
+      </div>
+      <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3">
+        <Geo />
       </div>
       <div className="flex-1 overflow-auto p-4">
         {data.length > 0 ? (
