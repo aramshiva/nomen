@@ -51,7 +51,8 @@ function Search() {
   const [submittedName, setSubmittedName] = useState("");
   const [submittedSex, setSubmittedSex] = useState("");
 
-  const handleSearch = async () => {
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!name || !sex) return;
 
     setIsLoading(true);
@@ -88,7 +89,7 @@ function Search() {
               1880-2023, tabulated from the United States Social Security
               Adminstration{"'"}s data.
             </p>
-            <div className="flex flex-col space-y-5">
+            <form onSubmit={handleSearch} className="flex flex-col space-y-5">
               <motion.div
                 className="flex flex-col space-y-2"
                 layoutId="name-input-container"
@@ -120,11 +121,7 @@ function Search() {
                 </motion.div>
               </motion.div>
               <motion.div layoutId="search-button">
-                <Button
-                  onClick={handleSearch}
-                  disabled={isLoading}
-                  className="w-full"
-                >
+                <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? "Searching..." : "Search the database!"}
                 </Button>
               </motion.div>
@@ -133,7 +130,7 @@ function Search() {
                   Popular Names
                 </Link>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -147,7 +144,10 @@ function Search() {
           <motion.a className="font-bold mr-4" layoutId="title" href="/">
             Nomen
           </motion.a>
-          <div className="flex-1 flex flex-col md:flex-row gap-4 items-center">
+          <form
+            onSubmit={handleSearch}
+            className="flex-1 flex flex-col md:flex-row gap-4 items-center"
+          >
             <motion.div className="w-full" layoutId="name-input-container">
               <motion.div layoutId="name-input">
                 <Input
@@ -176,7 +176,7 @@ function Search() {
               </motion.div>
             </motion.div>
             <motion.div layoutId="search-button">
-              <Button onClick={handleSearch} disabled={isLoading}>
+              <Button type="submit" disabled={isLoading}>
                 <motion.span
                   key={isLoading ? "loading" : "idle"}
                   initial={{ opacity: 0, filter: "blur(4px)" }}
@@ -188,7 +188,7 @@ function Search() {
                 </motion.span>
               </Button>
             </motion.div>
-          </div>
+          </form>
         </div>
       </div>
 
