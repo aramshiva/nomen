@@ -53,26 +53,34 @@ export default function PopularNamesPage() {
     const fetchPopularNames = async () => {
         setIsLoading(true);
         try {
-                let apiUrl = `/api/year?year=${year}`;
+            let apiUrl;
+            if (year === "all") {
+                apiUrl = `/api/popular/all`;
+                if (sex !== "all") {
+                    apiUrl += `?sex=${sex}`;
+                }
+            } else {
+                apiUrl = `/api/year?year=${year}`;
                 if (sex !== "all") {
                     apiUrl += `&sex=${sex}`;
                 }
-                
-                const response = await fetch(apiUrl);
-                const result = await response.json();
-                
-                if (result.success && Array.isArray(result.data)) {
-                        const sortedData = result.data.sort((a: PopularNameData, b: PopularNameData) => b.amount - a.amount);
-                        
-                        const rankedData: PopularNameData[] = sortedData.map((item: PopularNameData, index: number) => ({
-                                ...item,
-                                rank: index + 1
-                        }));
-                        
-                        setData(rankedData);
-                } else {
-                        setData([]);
-                }
+            }
+            
+            const response = await fetch(apiUrl);
+            const result = await response.json();
+            
+            if (result.success && Array.isArray(result.data)) {
+                    const sortedData = result.data.sort((a: PopularNameData, b: PopularNameData) => b.amount - a.amount);
+                    
+                    const rankedData: PopularNameData[] = sortedData.map((item: PopularNameData, index: number) => ({
+                            ...item,
+                            rank: index + 1
+                    }));
+                    
+                    setData(rankedData);
+            } else {
+                    setData([]);
+            }
         } catch (error) {
                 console.error("Error fetching popular names:", error);
                 setData([]);
@@ -153,9 +161,7 @@ export default function PopularNamesPage() {
                                     <TableHead className="w-[80px]">Rank</TableHead>
                                     <TableHead>Name</TableHead>
                                     <TableHead>Sex</TableHead>
-                                    <TableHead className="text-right">Count</TableHead>
-                                    {year === "all" && <TableHead className="text-right">Most Popular Year</TableHead>}
-                                </TableRow>
+                                    <TableHead className="text-right">Count</TableHead>                                </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {data.map((item, index) => (
@@ -171,9 +177,6 @@ export default function PopularNamesPage() {
                                         </TableCell>
                                         <TableCell>{item.sex === "M" ? "Male" : "Female"}</TableCell>
                                         <TableCell className="text-right">{item.amount.toLocaleString()}</TableCell>
-                                        {year === "all" && (
-                                            <TableCell className="text-right">{item.year}</TableCell>
-                                        )}
                                     </TableRow>
                                 ))}
                             </TableBody>
