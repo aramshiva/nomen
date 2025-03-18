@@ -72,9 +72,9 @@ export default function PopularNamesPage() {
                 const result = await response.json();
                 
                 if (result.success && Array.isArray(result.data)) {
-                        const sortedData = result.data.sort((a, b) => b.amount - a.amount);
+                        const sortedData = result.data.sort((a: PopularNameData, b: PopularNameData) => b.amount - a.amount);
                         
-                        const rankedData = sortedData.map((item, index) => ({
+                        const rankedData: PopularNameData[] = sortedData.map((item: PopularNameData, index: number) => ({
                                 ...item,
                                 rank: index + 1
                         }));
