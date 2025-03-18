@@ -33,7 +33,7 @@ interface NameData {
   year: number;
 }
 
-export function Search() {
+function Search() {
   const searchParams = useSearchParams();
   const urlName = searchParams.get("name");
   const urlSex = searchParams.get("sex");
