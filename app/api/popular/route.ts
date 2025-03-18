@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
             .orderBy(desc(sql`total`))
             .limit(500);
 
-        const popularNames = await query;
+        const popularNames = await finalQuery;
 
         return NextResponse.json({ 
             success: true, 
