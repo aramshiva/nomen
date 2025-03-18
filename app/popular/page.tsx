@@ -54,9 +54,17 @@ export default function PopularNamesPage() {
   const fetchPopularNames = async () => {
     setIsLoading(true);
     try {
-      let apiUrl = `/api/year?year=${year}`;
-      if (sex !== "all") {
-        apiUrl += `&sex=${sex}`;
+      let apiUrl;
+      if (year === "all") {
+        apiUrl = `/api/popular/all`;
+        if (sex !== "all") {
+          apiUrl += `?sex=${sex}`;
+        }
+      } else {
+        apiUrl = `/api/year?year=${year}`;
+        if (sex !== "all") {
+          apiUrl += `&sex=${sex}`;
+        }
       }
 
       const response = await fetch(apiUrl);
