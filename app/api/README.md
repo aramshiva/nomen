@@ -177,4 +177,4 @@ For the `/api/year` and `/api/popular` endpoints:
 
 ## Rate Limiting
 
-Please be mindful of rate limits when making requests to these API endpoints.
+No rate limits are applied to these API endpoints, but misusing and abusing them may mean I will need to rate limit these in the future. Please try to keep your requests under 5/req/min.
