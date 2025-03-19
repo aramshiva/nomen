@@ -25,7 +25,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Geo from "@/components/geo";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Divide } from "lucide-react";
+import { TopBar } from "@/components/top-bar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -88,6 +88,7 @@ function Search() {
       setShowMap(urlMap === 'true');
       handleSearch();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlName, urlSex, urlMap]);
 
   if (!hasSearched) {
@@ -96,7 +97,7 @@ function Search() {
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
           <div className="w-[30rem] max-w-full">
             <motion.p className="font-bold text-xl">Nomen</motion.p>
-            <p className="text-gray-500 text-sm pb-5">
+            <p className="text-muted-foreground text-sm pb-5">
               A parser for every name listed on a social security card between
               1880-2023, tabulated from the United States Social Security
               Adminstration{"'"}s data.
@@ -145,7 +146,7 @@ function Search() {
                   </motion.span>
                 </Button>
               </motion.div>
-              <div className="items-center text-center text-sm text-gray-600">
+              <div className="flex justify-center items-center text-sm text-muted-foreground">
                 <Link href="/popular" className="underline">
                   Popular Names
                 </Link>
@@ -159,58 +160,53 @@ function Search() {
 
   return (
     <div className={inter.className + " min-h-screen flex flex-col"}>
-      <div className="border-b p-4 bg-white shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto flex flex-col md:flex-row items-center gap-4">
-          <motion.a className="font-bold mr-4" layoutId="title" href="/">
-            Nomen
-          </motion.a>
-          <form
-            onSubmit={handleSearch}
-            className="flex-1 flex flex-col md:flex-row gap-4 items-center"
+      <TopBar>
+        <form
+          onSubmit={handleSearch}
+          className="flex-1 flex flex-col md:flex-row gap-4 items-center"
+        >
+          <motion.div className="w-full" layoutId="name-input-container">
+            <motion.div layoutId="name-input">
+              <Input
+                type="text"
+                placeholder="Enter a name"
+                aria-label="Name search"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </motion.div>
+          </motion.div>
+          <motion.div
+            className="w-full md:w-40"
+            layoutId="sex-select-container"
           >
-            <motion.div className="w-full" layoutId="name-input-container">
-              <motion.div layoutId="name-input">
-                <Input
-                  type="text"
-                  placeholder="Enter a name"
-                  aria-label="Name search"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </motion.div>
+            <motion.div layoutId="sex-select">
+              <Select value={sex} onValueChange={setSex}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="M">Male</SelectItem>
+                  <SelectItem value="F">Female</SelectItem>
+                </SelectContent>
+              </Select>
             </motion.div>
-            <motion.div
-              className="w-full md:w-40"
-              layoutId="sex-select-container"
-            >
-              <motion.div layoutId="sex-select">
-                <Select value={sex} onValueChange={setSex}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="M">Male</SelectItem>
-                    <SelectItem value="F">Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </motion.div>
-            </motion.div>
-            <motion.div layoutId="search-button">
-              <Button type="submit" disabled={isLoading}>
-                <motion.span
-                  key={isLoading ? "loading" : "idle"}
-                  initial={{ opacity: 0, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, filter: "blur(4px)" }}
-                  transition={{ duration: 0.6 }}
-                >
-                  {isLoading ? "Searching..." : "Search"}
-                </motion.span>
-              </Button>
-            </motion.div>
-          </form>
-        </div>
-      </div>
+          </motion.div>
+          <motion.div layoutId="search-button">
+            <Button type="submit" disabled={isLoading}>
+              <motion.span
+                key={isLoading ? "loading" : "idle"}
+                initial={{ opacity: 0, filter: "blur(4px)" }}
+                animate={{ opacity: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, filter: "blur(4px)" }}
+                transition={{ duration: 0.6 }}
+              >
+                {isLoading ? "Searching..." : "Search"}
+              </motion.span>
+            </Button>
+          </motion.div>
+        </form>
+      </TopBar>
 
       <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 flex flex-row gap-2">
         {showMap && (
@@ -240,7 +236,7 @@ function Search() {
         {data.length > 0 ? (
           <div className="container mx-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-white">
+              <TableHeader className="sticky top-0 bg-background">
                 <TableRow>
                   <TableHead className="w-[100px]">Name</TableHead>
                   <TableHead>Sex</TableHead>
@@ -262,7 +258,7 @@ function Search() {
           </div>
         ) : (
           <div className="h-full flex items-center justify-center">
-            <p className="text-gray-500">No results found</p>
+            <p className="text-muted-foreground">No results found</p>
           </div>
         )}
       </div>
@@ -275,7 +271,7 @@ function Fallback() {
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <div className="w-[30rem] max-w-full">
         <p className="font-bold text-xl">Nomen</p>
-        <p className="text-gray-500 text-sm pb-5">Loading...</p>
+        <p className="text-muted-foreground text-sm pb-5">Loading...</p>
       </div>
     </div>
   );
