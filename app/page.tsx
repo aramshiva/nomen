@@ -23,7 +23,6 @@ import { motion } from "motion/react";
 import Chart from "@/components/chart";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { TopBar } from "@/components/top-bar";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -78,6 +77,7 @@ function Search() {
       setSex(urlSex);
       handleSearch();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlName, urlSex]);
 
   if (!hasSearched) {

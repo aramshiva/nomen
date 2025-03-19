@@ -18,9 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { TopBar } from "@/components/top-bar";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -98,10 +96,12 @@ export default function PopularNamesPage() {
   useEffect(() => {
     fetchYearOptions();
     fetchPopularNames();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchPopularNames();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, sex]);
 
   return (
