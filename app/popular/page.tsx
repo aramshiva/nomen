@@ -158,11 +158,6 @@ export default function PopularNamesPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Sex</TableHead>
                   <TableHead className="text-right">Count</TableHead>
-                  {year === "all" && (
-                    <TableHead className="text-right">
-                      Most Popular Year
-                    </TableHead>
-                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -183,9 +178,6 @@ export default function PopularNamesPage() {
                     <TableCell className="text-right">
                       {item.amount.toLocaleString()}
                     </TableCell>
-                    {year === "all" && (
-                      <TableCell className="text-right">{item.year}</TableCell>
-                    )}
                   </TableRow>
                 ))}
               </TableBody>
