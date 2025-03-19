@@ -23,6 +23,9 @@ import { motion } from "motion/react";
 import Chart from "@/components/chart";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import Geo from "@/components/geo";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Divide } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,8 +46,10 @@ function Search() {
       : searchParams.get("sex")?.toLowerCase() === "female"
       ? "F"
       : "");
+  const urlMap = searchParams.get("map");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
+  const [showMap, setShowMap] = useState(urlMap === "true");
   const [data, setData] = useState<NameData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -54,6 +59,12 @@ function Search() {
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!name || !sex) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('name', name);
+    url.searchParams.set('sex', sex);
+    if (showMap) url.searchParams.set('map', 'true');
+    window.history.pushState({}, '', url);
 
     setIsLoading(true);
     try {
@@ -74,9 +85,10 @@ function Search() {
     if (urlName && urlSex) {
       setName(urlName);
       setSex(urlSex);
+      setShowMap(urlMap === 'true');
       handleSearch();
     }
-  }, [urlName, urlSex]);
+  }, [urlName, urlSex, urlMap]);
 
   if (!hasSearched) {
     return (
@@ -200,8 +212,29 @@ function Search() {
         </div>
       </div>
 
-      <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3">
-        <Chart name={submittedName} sex={submittedSex} />
+      <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 flex flex-row gap-2">
+        {showMap && (
+          <Card className="w-full">
+            <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+              <CardTitle>
+                {name} {sex ? `(${sex})` : ""} - Map
+              </CardTitle>
+              <CardDescription>
+                Showing name frequency over time
+              </CardDescription>
+            </CardHeader>
+            <div className="grid flex-1 gap-1 text-center sm:text-left">
+              <Geo
+                width="100%"
+                height="auto"
+                style={{ width: '100%', maxHeight: 'calc(100vh-20rem)' }}
+              />
+            </div>
+          </Card>
+        )}
+        <div className="w-full">
+          <Chart name={submittedName} sex={submittedSex} />
+        </div>
       </div>
       <div className="flex-1 overflow-auto p-4">
         {data.length > 0 ? (
