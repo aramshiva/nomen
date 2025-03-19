@@ -28,7 +28,7 @@ This data is sourced from the [US Social Security Administration's Baby Names fr
 
 ## Features
 
-- **Name Search**: Look up historical data for any name and gender combination
+- Name Search Look up historical data for any name and gender combination
 - **Trend Visualization**: Interactive charts showing name popularity over time
 - **Popular Names**: Browse the most popular names by year or across all time
 - **Data Table**: View detailed frequency data for each name by year
@@ -37,10 +37,10 @@ This data is sourced from the [US Social Security Administration's Baby Names fr
 
 Nomen is built with modern web technologies:
 
-- **Frontend**: [Next.js](https://nextjs.org/) (React framework)
+- **Frontend**: [Next.js](https://nextjs.org/) ([React](https://react.dev) framework)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/) components
-- **Database**: SQL database with [Drizzle ORM](https://orm.drizzle.team/)
-- **Animations**: [Motion One](https://motion.dev/) for smooth UI transitions
+- **Database**: MySQL database with [Drizzle ORM](https://orm.drizzle.team/)
+- **Animations**: [Motion (formerly Framer Motion)](https://motion.dev/) for smooth UI transitions
 - **API**: RESTful API endpoints built with Next.js API routes
 
 ## API
