@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (!name) {
       return NextResponse.json(
         { error: "Name parameters are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       .where(
         sex
           ? and(eq(names.name, name), eq(names.sex, sex))
-          : and(eq(names.name, name))
+          : and(eq(names.name, name)),
       )
       .orderBy(asc(names.year));
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { error: "Failed to fetch names" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

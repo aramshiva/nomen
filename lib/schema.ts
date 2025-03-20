@@ -22,5 +22,12 @@ export const uniquenames = mysqlTable("uniquenames", {
 export const unique_names = mysqlTable("unique_names", {
   name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
   amount: int("amount").notNull().default(0),
-  sex: char("sex", { length: 1 }).notNull().default("")
+  sex: char("sex", { length: 1 }).notNull().default(""),
 }); // names with amount
+
+export const uniquenamesbyarea = mysqlTable("uniquenamesbyarea", {
+  name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
+  amount: int("amount").notNull().default(0),
+  sex: char("sex", { length: 1 }).notNull().default(""),
+  state: char("state", { length: 2 }).notNull().default(""),
+}); // names with amount and state

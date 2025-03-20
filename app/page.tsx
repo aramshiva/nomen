@@ -24,6 +24,9 @@ import Chart from "@/components/chart";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/top-bar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import Heatmap from "@/components/heatmap";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,10 +45,12 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
+  const urlMap = searchParams.get("map");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
+  const [showMap, setShowMap] = useState(urlMap === "true");
   const [data, setData] = useState<NameData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -55,6 +60,12 @@ function Search() {
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!name || !sex) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("name", name);
+    url.searchParams.set("sex", sex);
+    if (showMap) url.searchParams.set("map", "true");
+    window.history.pushState({}, "", url);
 
     setIsLoading(true);
     try {
@@ -75,10 +86,11 @@ function Search() {
     if (urlName && urlSex) {
       setName(urlName);
       setSex(urlSex);
+      setShowMap(urlMap === "true");
       handleSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlName, urlSex]);
+  }, [urlName, urlSex, urlMap]);
 
   if (!hasSearched) {
     return (
@@ -122,6 +134,27 @@ function Search() {
                   </Select>
                 </motion.div>
               </motion.div>
+              <motion.div
+                className="flex flex-col space-y-2"
+                layoutId="search-map-checkbox-container"
+              >
+                <motion.div
+                  layoutId="search-map-checkbox"
+                  className="flex items-center"
+                >
+                  <Checkbox
+                    id="show-map"
+                    checked={showMap}
+                    onClick={() => setShowMap(!showMap)}
+                  />
+                  <label htmlFor="show-map" className="ml-2 cursor-pointer">
+                    Show Map
+                  </label>
+                  <Badge variant="secondary" className="ml-2">
+                    Beta
+                  </Badge>
+                </motion.div>
+              </motion.div>
               <motion.div layoutId="search-button">
                 <Button type="submit" disabled={isLoading} className="w-full">
                   <motion.span
@@ -148,89 +181,93 @@ function Search() {
   }
 
   return (
-    <div className={inter.className + " min-h-screen flex flex-col"}>
-      <TopBar>
-        <form
-          onSubmit={handleSearch}
-          className="flex-1 flex flex-col md:flex-row gap-4 items-center"
-        >
-          <motion.div className="w-full" layoutId="name-input-container">
-            <motion.div layoutId="name-input">
-              <Input
-                type="text"
-                placeholder="Enter a name"
-                aria-label="Name search"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </motion.div>
-          </motion.div>
-          <motion.div
-            className="w-full md:w-40"
-            layoutId="sex-select-container"
+    <>
+      <div className={inter.className + " min-h-screen flex flex-col"}>
+        <TopBar>
+          <form
+            onSubmit={handleSearch}
+            className="flex-1 flex flex-col md:flex-row gap-4 items-center"
           >
-            <motion.div layoutId="sex-select">
-              <Select value={sex} onValueChange={setSex}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="M">Male</SelectItem>
-                  <SelectItem value="F">Female</SelectItem>
-                </SelectContent>
-              </Select>
+            <motion.div className="w-full" layoutId="name-input-container">
+              <motion.div layoutId="name-input">
+                <Input
+                  type="text"
+                  placeholder="Enter a name"
+                  aria-label="Name search"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </motion.div>
             </motion.div>
-          </motion.div>
-          <motion.div layoutId="search-button">
-            <Button type="submit" disabled={isLoading}>
-              <motion.span
-                key={isLoading ? "loading" : "idle"}
-                initial={{ opacity: 0, filter: "blur(4px)" }}
-                animate={{ opacity: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, filter: "blur(4px)" }}
-                transition={{ duration: 0.6 }}
-              >
-                {isLoading ? "Searching..." : "Search"}
-              </motion.span>
-            </Button>
-          </motion.div>
-        </form>
-      </TopBar>
-
-      <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3">
-        <Chart name={submittedName} sex={submittedSex} />
-      </div>
-      <div className="flex-1 overflow-auto p-4">
-        {data.length > 0 ? (
-          <div className="container mx-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-background">
-                <TableRow>
-                  <TableHead className="w-[100px]">Name</TableHead>
-                  <TableHead>Sex</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead className="text-right">Year</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.sex}</TableCell>
-                    <TableCell>{item.amount}</TableCell>
-                    <TableCell className="text-right">{item.year}</TableCell>
+            <motion.div
+              className="w-full md:w-40"
+              layoutId="sex-select-container"
+            >
+              <motion.div layoutId="sex-select">
+                <Select value={sex} onValueChange={setSex}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="M">Male</SelectItem>
+                    <SelectItem value="F">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </motion.div>
+            </motion.div>
+            <motion.div layoutId="search-button">
+              <Button type="submit" disabled={isLoading}>
+                <motion.span
+                  key={isLoading ? "loading" : "idle"}
+                  initial={{ opacity: 0, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, filter: "blur(4px)" }}
+                  transition={{ duration: 0.6 }}
+                >
+                  {isLoading ? "Searching..." : "Search"}
+                </motion.span>
+              </Button>
+            </motion.div>
+          </form>
+        </TopBar>
+        <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 flex flex-row gap-2">
+          <div className="w-full">
+            <Chart name={submittedName} sex={submittedSex} />
+          </div>
+          {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
+        </div>
+        <div className="flex-1 overflow-auto p-4">
+          {data.length > 0 ? (
+            <div className="container mx-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background">
+                  <TableRow>
+                    <TableHead className="w-[100px]">Name</TableHead>
+                    <TableHead>Sex</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead className="text-right">Year</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-muted-foreground">No results found</p>
-          </div>
-        )}
+                </TableHeader>
+                <TableBody>
+                  {data.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell>{item.sex}</TableCell>
+                      <TableCell>{item.amount}</TableCell>
+                      <TableCell className="text-right">{item.year}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <p className="text-muted-foreground">No results found</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

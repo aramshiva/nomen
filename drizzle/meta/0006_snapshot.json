@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e1c5d288-fc0d-489e-8ad9-b111aa77d6cc",
-  "prevId": "eec9abfb-a8d1-48ee-9d2e-795ad1c473d2",
+  "id": "96ce8005-38c4-4a31-b063-9d629643e451",
+  "prevId": "e1c5d288-fc0d-489e-8ad9-b111aa77d6cc",
   "tables": {
     "names": {
       "name": "names",
@@ -128,6 +128,14 @@
         "sex": {
           "name": "sex",
           "type": "char(1)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "state": {
+          "name": "state",
+          "type": "char(2)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,

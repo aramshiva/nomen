@@ -1,9 +1,7 @@
 import { db } from "@/lib/db";
-import { namesbyarea } from "@/lib/schema";
+import { uniquenamesbyarea } from "@/lib/schema";
 import { eq, and, asc } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-
-export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,21 +19,27 @@ export async function GET(request: NextRequest) {
 
     const result = await db
       .select()
-      .from(namesbyarea)
+      .from(uniquenamesbyarea)
       .where(
         state
           ? sex
             ? and(
-                eq(namesbyarea.name, name),
-                eq(namesbyarea.sex, sex),
-                eq(namesbyarea.state, state),
+                eq(uniquenamesbyarea.name, name),
+                eq(uniquenamesbyarea.sex, sex),
+                eq(uniquenamesbyarea.state, state),
               )
-            : and(eq(namesbyarea.name, name), eq(namesbyarea.state, state))
+            : and(
+                eq(uniquenamesbyarea.name, name),
+                eq(uniquenamesbyarea.state, state),
+              )
           : sex
-            ? and(eq(namesbyarea.name, name), eq(namesbyarea.sex, sex))
-            : eq(namesbyarea.name, name),
+            ? and(
+                eq(uniquenamesbyarea.name, name),
+                eq(uniquenamesbyarea.sex, sex),
+              )
+            : eq(uniquenamesbyarea.name, name),
       )
-      .orderBy(asc(namesbyarea.year));
+      .orderBy(asc(uniquenamesbyarea.state));
 
     return NextResponse.json(result);
   } catch (error) {

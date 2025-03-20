@@ -1,0 +1,1 @@
+ALTER TABLE `unique_names` ADD `state` char(2) DEFAULT '' NOT NULL;
