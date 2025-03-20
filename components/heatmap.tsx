@@ -25,12 +25,12 @@ export default function Heatmap({ sex, name }: { sex: string; name: string }) {
             </Badge>
           </CardTitle>
           <CardDescription>
-            Showing name frequency across states.
+            Showing name frequency across states from 1910 and later.
           </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center h-full pb-[4rem]">
-        <div className="w-[25rem]">
+        <div className="w-[20rem] md:w-[25rem]">
           <Geo theme={theme} sex={submittedSex} name={submittedName} />
         </div>
       </CardContent>

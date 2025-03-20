@@ -45,8 +45,8 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-        ? "F"
-        : "");
+      ? "F"
+      : "");
   const urlMap = searchParams.get("map");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
@@ -94,7 +94,12 @@ function Search() {
 
   if (!hasSearched) {
     return (
-      <div className={inter.className}>
+      <motion.div
+        className={`${inter.className}`}
+        initial={{ opacity: 0, filter: "blur(4px)" }}
+        animate={{ opacity: 1, filter: "blur(0px)" }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
           <div className="w-[30rem] max-w-full">
             <motion.p className="font-bold text-xl">Nomen</motion.p>
@@ -176,7 +181,7 @@ function Search() {
             </form>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -230,8 +235,8 @@ function Search() {
             </motion.div>
           </form>
         </TopBar>
-        <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 flex flex-row gap-2">
-          <div className="w-full">
+        <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
+          <div className="w-full pb-3 md:pb-0">
             <Chart name={submittedName} sex={submittedSex} />
           </div>
           {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
