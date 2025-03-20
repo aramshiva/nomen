@@ -6,7 +6,6 @@ import { desc, eq } from "drizzle-orm";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const sex = searchParams.get("sex");
-  const limit = searchParams.get("limit");
 
   try {
     const baseQuery = db.select().from(unique_names);
