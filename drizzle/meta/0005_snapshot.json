@@ -45,9 +45,7 @@
       "compositePrimaryKeys": {
         "names_name": {
           "name": "names_name",
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "uniqueConstraints": {},
@@ -102,9 +100,7 @@
       "compositePrimaryKeys": {
         "namesbyarea_name": {
           "name": "namesbyarea_name",
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "uniqueConstraints": {},
@@ -143,9 +139,7 @@
       "compositePrimaryKeys": {
         "unique_names_name": {
           "name": "unique_names_name",
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "uniqueConstraints": {},
@@ -168,9 +162,7 @@
       "compositePrimaryKeys": {
         "uniquenames_name": {
           "name": "uniquenames_name",
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "uniqueConstraints": {},

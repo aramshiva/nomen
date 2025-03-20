@@ -3,13 +3,16 @@
 > This **is** public data given by the Social Security Adminstration
 
 # Babies
+
 ### A parser for every name listed on a social security card between 1880-2023.
-*(Tabulated based on Social Security records as of March 3, 2024)*
+
+_(Tabulated based on Social Security records as of March 3, 2024)_
 
 Your first question is probably why? to that I ask why not?
 
 This data is pulled from the [US Social Security Administration's Baby Names from Social Security Card Applications - National Dataset](https://catalog.data.gov/dataset/baby-names-from-social-security-card-applications-national-data).
 This script will insert the data into a MySQL database with the following schema:
+
 ```
 name VARCHAR(255),
 sex CHAR(1),
@@ -18,6 +21,7 @@ year INT
 ```
 
 ### Some things to keep in note:
+
 - As of 2024 there are around 2,117,219 rows in the database.
 - The data is stored in a folder called "names" in the same directory as this script.
 - Names with 5 or less occurrences with the sex and year are defaulted to 5 by the SSA to protect privacy
@@ -32,8 +36,11 @@ year INT
   rank 2, and so forth.
 
 ### Planned Features (when i get bored again):
+
 - Add a new column for the state the name was registered/possibly create a new database to store the [state data](https://www.ssa.gov/oact/babynames/limits.html).
+
 ### Want to run yourself?
+
 - Fill in the `.env` (use `.env.example` as a guide)
 - Run `python3 main.py` (this can **take a couple days**, I suggest running it on a [Raspberry Pi](https://www.raspberrypi.com/) with [tmux](https://github.com/tmux/tmux) to run while terminal is closed
 - Boom! Your mySQL database is now full with data, and a table with 4 columns: `name, sex, amount, year`

@@ -71,14 +71,14 @@ export default function PopularNamesPage() {
 
       if (result.success && Array.isArray(result.data)) {
         const sortedData = result.data.sort(
-          (a: PopularNameData, b: PopularNameData) => b.amount - a.amount
+          (a: PopularNameData, b: PopularNameData) => b.amount - a.amount,
         );
 
         const rankedData: PopularNameData[] = sortedData.map(
           (item: PopularNameData, index: number) => ({
             ...item,
             rank: index + 1,
-          })
+          }),
         );
 
         setData(rankedData);

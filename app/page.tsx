@@ -45,8 +45,8 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlMap = searchParams.get("map");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
@@ -234,12 +234,7 @@ function Search() {
           <div className="w-full">
             <Chart name={submittedName} sex={submittedSex} />
           </div>
-          {showMap && (
-            <Heatmap
-              sex={submittedSex}
-              name={submittedName}
-            />
-          )}
+          {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
         </div>
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (

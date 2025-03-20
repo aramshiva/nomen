@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     if (!name) {
       return NextResponse.json(
         { error: "Name parameters are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -28,12 +28,12 @@ export async function GET(request: NextRequest) {
             ? and(
                 eq(namesbyarea.name, name),
                 eq(namesbyarea.sex, sex),
-                eq(namesbyarea.state, state)
+                eq(namesbyarea.state, state),
               )
             : and(eq(namesbyarea.name, name), eq(namesbyarea.state, state))
           : sex
-          ? and(eq(namesbyarea.name, name), eq(namesbyarea.sex, sex))
-          : eq(namesbyarea.name, name)
+            ? and(eq(namesbyarea.name, name), eq(namesbyarea.sex, sex))
+            : eq(namesbyarea.name, name),
       )
       .orderBy(asc(namesbyarea.year));
 
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { error: "Failed to fetch names" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

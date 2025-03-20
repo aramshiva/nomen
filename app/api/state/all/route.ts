@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     if (!name) {
       return NextResponse.json(
         { error: "Name parameters are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,11 +23,21 @@ export async function GET(request: NextRequest) {
       .where(
         state
           ? sex
-            ? and(eq(uniquenamesbyarea.name, name), eq(uniquenamesbyarea.sex, sex), eq(uniquenamesbyarea.state, state))
-            : and(eq(uniquenamesbyarea.name, name), eq(uniquenamesbyarea.state, state))
+            ? and(
+                eq(uniquenamesbyarea.name, name),
+                eq(uniquenamesbyarea.sex, sex),
+                eq(uniquenamesbyarea.state, state),
+              )
+            : and(
+                eq(uniquenamesbyarea.name, name),
+                eq(uniquenamesbyarea.state, state),
+              )
           : sex
-            ? and(eq(uniquenamesbyarea.name, name), eq(uniquenamesbyarea.sex, sex))
-            : eq(uniquenamesbyarea.name, name)
+            ? and(
+                eq(uniquenamesbyarea.name, name),
+                eq(uniquenamesbyarea.sex, sex),
+              )
+            : eq(uniquenamesbyarea.name, name),
       )
       .orderBy(asc(uniquenamesbyarea.state));
 
@@ -36,7 +46,7 @@ export async function GET(request: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { error: "Failed to fetch names" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

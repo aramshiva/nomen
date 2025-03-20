@@ -29,7 +29,7 @@ export default function Geo({
 
   const getNumericDimension = (
     value: number | "auto" | "100%",
-    defaultValue: number
+    defaultValue: number,
   ) => {
     if (typeof value === "number") return value;
     return defaultValue;
@@ -118,7 +118,7 @@ export default function Geo({
         }
 
         const maxAmount = Math.max(
-          ...data.map((item: StateDataItem) => item.amount)
+          ...data.map((item: StateDataItem) => item.amount),
         );
 
         interface ProcessedStateData {
@@ -133,7 +133,7 @@ export default function Geo({
             const percentage = (item.amount / maxAmount) * 100;
 
             const existing = acc.find(
-              (s: ProcessedStateData) => s.state === stateName
+              (s: ProcessedStateData) => s.state === stateName,
             );
             if (existing) {
               existing.value += percentage;
@@ -143,7 +143,7 @@ export default function Geo({
 
             return acc;
           },
-          [] as ProcessedStateData[]
+          [] as ProcessedStateData[],
         );
 
         setStateData(processedData);
@@ -169,7 +169,7 @@ export default function Geo({
       }
 
       const us = await d3.json<UsAtlasData>(
-        "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
+        "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json",
       );
 
       if (!us || !svgRef.current) return;
@@ -191,7 +191,7 @@ export default function Geo({
       const path = d3.geoPath().projection(projection);
       const states = topojson.feature(
         us as unknown as Topology,
-        us.objects.states as unknown as GeometryCollection
+        us.objects.states as unknown as GeometryCollection,
       ) as FeatureCollection;
       const stateIdMap = new Map();
 
@@ -209,7 +209,7 @@ export default function Geo({
       const statemesh = topojson.mesh(
         us as unknown as Topology,
         us.objects.states as unknown as GeometryCollection,
-        (a, b) => a !== b
+        (a, b) => a !== b,
       );
 
       const svg = d3
@@ -263,14 +263,14 @@ export default function Geo({
           g.append("g")
             .attr(
               "transform",
-              `translate(${legendMargin.left},${legendMargin.top})`
+              `translate(${legendMargin.left},${legendMargin.top})`,
             )
             .selectAll("rect")
             .data(
               color.range().map((d, i) => ({
                 offset: i / (color.range().length - 1),
                 color: d,
-              }))
+              })),
             )
             .join("rect")
             .attr("x", (d) => legendScale(color.invertExtent(d.color)[0]))
@@ -290,7 +290,7 @@ export default function Geo({
           g.append("g")
             .attr(
               "transform",
-              `translate(${legendMargin.left},${legendHeight})`
+              `translate(${legendMargin.left},${legendHeight})`,
             )
             .call(legendAxis)
             .call((g) => g.select(".domain").remove())
