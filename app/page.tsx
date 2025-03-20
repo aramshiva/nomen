@@ -23,14 +23,6 @@ import { motion } from "motion/react";
 import Chart from "@/components/chart";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import Geo from "@/components/geo";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { TopBar } from "@/components/top-bar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
