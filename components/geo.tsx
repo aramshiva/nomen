@@ -1,7 +1,7 @@
 // im sorry for anyone reading this code, i know its a mess.
 // it was made with d3, ai, and a lot of luck
 // i have no idea how it works, but it does
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 
@@ -9,73 +9,87 @@ interface GeoProps {
   height?: number | "auto" | "100%";
   width?: number | "auto" | "100%";
   name?: string;
+  sex?: string
 }
 
-export default function Geo({ height = 610, width = 975, name }: GeoProps) {
+export default function Geo({ height = 610, width = 975, name, sex }: GeoProps) {
   const svgRef = useRef(null);
+  const [stateData, setStateData] = useState([]);
   
   const getNumericDimension = (value: number | "auto" | "100%", defaultValue: number) => {
     if (typeof value === 'number') return value;
     return defaultValue;
   };
 
+  const getStateNameFromAbbreviation = (abbr) => {
+    const stateMap = {
+      'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+      'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+      'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+      'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+      'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+      'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+      'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+      'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+      'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+      'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+    };
+    return stateMap[abbr] || "";
+  };
+
+  useEffect(() => {
+    const fetchStateData = async () => {
+      try {
+        let url = '/api/state/all';
+        const params = new URLSearchParams();
+        
+        if (name) params.append('name', name);
+        if (sex) params.append('sex', sex);
+        
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Failed to fetch state data');
+        }
+        const data = await response.json();
+        
+        // Find the maximum amount
+        const maxAmount = Math.max(...data.map(item => item.amount));
+        
+        const processedData = data.reduce((acc, item) => {
+          const stateAbbr = item.state;
+          const stateName = getStateNameFromAbbreviation(stateAbbr);
+          const percentage = (item.amount / maxAmount) * 100;
+          
+          const existing = acc.find(s => s.state === stateName);
+          if (existing) {
+            existing.value += percentage;
+          } else {
+            acc.push({ state: stateName, value: percentage });
+          }
+          
+          return acc;
+        }, []);
+        
+        setStateData(processedData);
+      } catch (error) {
+        console.error('Error fetching state data:', error);
+        setStateData([]);
+      }
+    };
+
+    fetchStateData();
+  }, [name, sex]);
+
+  console.log(stateData)
+
   useEffect(() => {
     const numericHeight = getNumericDimension(height, 610);
     const numericWidth = getNumericDimension(width, 975);
     
-    const sampleData = [
-      { state: "Alabama", value: 5.2 },
-      { state: "Alaska", value: 7.1 },
-      { state: "Arizona", value: 6.8 },
-      { state: "Arkansas", value: 3.9 },
-      { state: "California", value: 8.7 },
-      { state: "Colorado", value: 4.5 },
-      { state: "Connecticut", value: 5.4 },
-      { state: "Delaware", value: 4.0 },
-      { state: "Florida", value: 7.2 },
-      { state: "Georgia", value: 6.1 },
-      { state: "Hawaii", value: 2.8 },
-      { state: "Idaho", value: 3.2 },
-      { state: "Illinois", value: 6.5 },
-      { state: "Indiana", value: 4.9 },
-      { state: "Iowa", value: 3.5 },
-      { state: "Kansas", value: 3.8 },
-      { state: "Kentucky", value: 5.0 },
-      { state: "Louisiana", value: 6.9 },
-      { state: "Maine", value: 3.0 },
-      { state: "Maryland", value: 5.6 },
-      { state: "Massachusetts", value: 6.0 },
-      { state: "Michigan", value: 5.8 },
-      { state: "Minnesota", value: 3.7 },
-      { state: "Mississippi", value: 7.0 },
-      { state: "Missouri", value: 4.8 },
-      { state: "Montana", value: 3.4 },
-      { state: "Nebraska", value: 3.1 },
-      { state: "Nevada", value: 8.5 },
-      { state: "New Hampshire", value: 2.9 },
-      { state: "New Jersey", value: 6.7 },
-      { state: "New Mexico", value: 7.5 },
-      { state: "New York", value: 7.8 },
-      { state: "North Carolina", value: 5.7 },
-      { state: "North Dakota", value: 2.5 },
-      { state: "Ohio", value: 5.3 },
-      { state: "Oklahoma", value: 4.6 },
-      { state: "Oregon", value: 6.3 },
-      { state: "Pennsylvania", value: 5.5 },
-      { state: "Rhode Island", value: 6.2 },
-      { state: "South Carolina", value: 5.9 },
-      { state: "South Dakota", value: 2.7 },
-      { state: "Tennessee", value: 4.7 },
-      { state: "Texas", value: 7.6 },
-      { state: "Utah", value: 3.3 },
-      { state: "Vermont", value: 2.6 },
-      { state: "Virginia", value: 4.3 },
-      { state: "Washington", value: 6.4 },
-      { state: "West Virginia", value: 5.1 },
-      { state: "Wisconsin", value: 3.6 },
-      { state: "Wyoming", value: 3.0 }
-    ];
-
     const createMap = async () => {
       const us = await d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
       
@@ -84,8 +98,8 @@ export default function Geo({ height = 610, width = 975, name }: GeoProps) {
       d3.select(svgRef.current).selectAll("*").remove();
 
       const color = d3.scaleQuantize<string>()
-        .domain([1, 10])
-        .range(d3.schemeBlues[9]);
+        .domain([0, 100])
+        .range(d3.schemeBlues[3]);
       
       const scaleFactor = numericHeight / 610;
       const scaledWidth = numericWidth || 975 * scaleFactor;
@@ -105,7 +119,7 @@ export default function Geo({ height = 610, width = 975, name }: GeoProps) {
       });
       
       const valueMap = new Map();
-      sampleData.forEach(d => {
+      stateData.forEach(d => {
         const stateId = stateIdMap.get(d.state);
         if (stateId) valueMap.set(stateId, d.value);
       });
@@ -146,7 +160,7 @@ export default function Geo({ height = 610, width = 975, name }: GeoProps) {
         d3.select(svgRef.current).selectAll("*").remove();
       }
     };
-  }, [height, width]);
+  }, [height, width, stateData]);
 
   const svgStyle = {
     width: typeof width === 'number' ? `${width}px` : width,
