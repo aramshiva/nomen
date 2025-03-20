@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/card";
 import { TopBar } from "@/components/top-bar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import Heatmap from "@/components/heatmap";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -144,15 +146,21 @@ function Search() {
                 className="flex flex-col space-y-2"
                 layoutId="search-map-checkbox-container"
               >
-                <motion.div layoutId="search-map-checkbox" className="flex items-center">
+                <motion.div
+                  layoutId="search-map-checkbox"
+                  className="flex items-center"
+                >
                   <Checkbox
-                  id="show-map"
-                  checked={showMap}
-                  onClick={() => setShowMap(!showMap)}
+                    id="show-map"
+                    checked={showMap}
+                    onClick={() => setShowMap(!showMap)}
                   />
                   <label htmlFor="show-map" className="ml-2 cursor-pointer">
-                  Show Map
+                    Show Map
                   </label>
+                  <Badge variant="secondary" className="ml-2">
+                    Beta
+                  </Badge>
                 </motion.div>
               </motion.div>
               <motion.div layoutId="search-button">
@@ -231,32 +239,15 @@ function Search() {
           </form>
         </TopBar>
         <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 flex flex-row gap-2">
-          {showMap && (
-            <Card className="w-full">
-              <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-                <CardTitle>
-                  {submittedName} {submittedSex ? `(${submittedSex})` : ""} -
-                  Map
-                </CardTitle>
-                <CardDescription>
-                  Showing name frequency over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center justify-center h-full">
-                <div className="w-[25rem]">
-                  <Geo
-                    width="auto"
-                    height="auto"
-                    sex={submittedSex}
-                    name={submittedName}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
           <div className="w-full">
             <Chart name={submittedName} sex={submittedSex} />
           </div>
+          {showMap && (
+            <Heatmap
+              sex={submittedSex}
+              name={submittedName}
+            />
+          )}
         </div>
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (
