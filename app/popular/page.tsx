@@ -148,7 +148,7 @@ export default function PopularNamesPage() {
         ) : data.length > 0 ? (
           <div className="container mx-auto">
             <h2 className="text-xl font-semibold mb-4">
-              {year === "all" ? "All Time" : year} Top 500{" "}
+              {year === "all" ? "All Time" : year} Top 1000{" "}
               {sex === "M" ? "Male" : sex === "F" ? "Female" : ""} Names
             </h2>
             <Table>
@@ -157,7 +157,7 @@ export default function PopularNamesPage() {
                   <TableHead className="w-[80px]">Rank</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Sex</TableHead>
-                  <TableHead className="text-right">Count</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
