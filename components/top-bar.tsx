@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import Link from "next/link";
 import { motion } from "motion/react";
 import { ThemeToggle } from "./theme-toggle";
 
