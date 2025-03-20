@@ -27,6 +27,7 @@ import { TopBar } from "@/components/top-bar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
+import { Download } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -91,6 +92,29 @@ function Search() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlName, urlSex, urlMap]);
+
+  const exportToCsv = () => {
+    if (data.length === 0) return;
+    
+    const headers = ["Name", "Sex", "Amount", "Year"];
+    const csvContent = [
+      headers.join(','),
+      ...data.map(item => 
+        `${item.name},${item.sex},${item.amount},${item.year}`
+      )
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${submittedName}-${submittedSex}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   if (!hasSearched) {
     return (
@@ -244,6 +268,17 @@ function Search() {
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (
             <div className="container mx-auto">
+              <div className="flex justify-end mb-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={exportToCsv}
+                  className="flex items-center gap-2"
+                >
+                  <Download size={16} />
+                  Export CSV
+                </Button>
+              </div>
               <Table>
                 <TableHeader className="sticky top-0 bg-background">
                   <TableRow>
