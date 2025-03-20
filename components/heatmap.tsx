@@ -7,10 +7,12 @@ import {
 } from "./ui/card";
 import Geo from "./geo";
 import { Badge } from "./ui/badge";
+import { useTheme } from "next-themes";
 
 export default function Heatmap({ sex, name }: { sex: string, name: string }) {
     const submittedSex = sex;
     const submittedName = name;
+    const { theme } = useTheme();
 
     return (
         <Card className="w-full pb-2">
@@ -28,6 +30,7 @@ export default function Heatmap({ sex, name }: { sex: string, name: string }) {
             <CardContent className="flex flex-col items-center justify-center h-full pb-[4rem]">
                 <div className="w-[25rem]">
                     <Geo
+                        theme={theme}
                         sex={submittedSex}
                         name={submittedName}
                     />
