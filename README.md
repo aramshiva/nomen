@@ -45,7 +45,7 @@ Nomen is built with modern web technologies:
 
 ## API
 
-For detailed API documentation, see the [API README](/api/README.md).
+For detailed API documentation, see the [API README](/app/api/README.md).
 
 ## Data Schema
 
