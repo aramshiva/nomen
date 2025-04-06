@@ -60,26 +60,15 @@ function Search() {
   const [submittedSex, setSubmittedSex] = useState("");
   const { theme, setTheme } = useTheme();
 
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!name || !sex) return;
-
-    if (name !== submittedName || sex !== submittedSex || showMap !== (urlMap === "true")) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("name", name);
-      url.searchParams.set("sex", sex);
-      if (showMap) url.searchParams.set("map", "true");
-      window.history.pushState({}, "", url);
-    }
-
+  const performSearch = async (searchName: string, searchSex: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/names?name=${name}&sex=${sex}`);
+      const response = await fetch(`/api/names?name=${searchName}&sex=${searchSex}`);
       const result = await response.json();
       setData(result);
       setHasSearched(true);
-      setSubmittedName(name);
-      setSubmittedSex(sex);
+      setSubmittedName(searchName);
+      setSubmittedSex(searchSex);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -87,12 +76,45 @@ function Search() {
     }
   };
 
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!name || !sex) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("name", name);
+    url.searchParams.set("sex", sex);
+    if (showMap) url.searchParams.set("map", "true");
+    window.history.pushState({}, "", url);
+
+    await performSearch(name, sex);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const currentUrl = new URL(window.location.href);
+      const currentName = currentUrl.searchParams.get("name");
+      const currentSex = currentUrl.searchParams.get("sex");
+      
+      if (currentName && currentSex) {
+        setName(currentName);
+        setSex(currentSex);
+        performSearch(currentName, currentSex);
+      } else {
+        setHasSearched(false);
+        setData([]);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   useEffect(() => {
     if (urlName && urlSex && !hasSearched) {
       setName(urlName);
       setSex(urlSex);
       setShowMap(urlMap === "true");
-      handleSearch();
+      performSearch(urlName, urlSex);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlName, urlSex, urlMap]);
