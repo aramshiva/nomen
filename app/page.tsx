@@ -58,6 +58,7 @@ function Search() {
   const [hasSearched, setHasSearched] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
   const [submittedSex, setSubmittedSex] = useState("");
+  const { theme, setTheme } = useTheme();
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -120,7 +121,6 @@ function Search() {
   };
 
   if (!hasSearched) {
-    const { theme, setTheme } = useTheme();
     return (
       <motion.div
         className={`${inter.className}`}
