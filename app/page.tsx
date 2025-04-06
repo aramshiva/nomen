@@ -28,6 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
 import { Download } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -62,11 +63,13 @@ function Search() {
     if (e) e.preventDefault();
     if (!name || !sex) return;
 
-    const url = new URL(window.location.href);
-    url.searchParams.set("name", name);
-    url.searchParams.set("sex", sex);
-    if (showMap) url.searchParams.set("map", "true");
-    window.history.pushState({}, "", url);
+    if (name !== submittedName || sex !== submittedSex || showMap !== (urlMap === "true")) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("name", name);
+      url.searchParams.set("sex", sex);
+      if (showMap) url.searchParams.set("map", "true");
+      window.history.pushState({}, "", url);
+    }
 
     setIsLoading(true);
     try {
@@ -84,7 +87,7 @@ function Search() {
   };
 
   useEffect(() => {
-    if (urlName && urlSex) {
+    if (urlName && urlSex && !hasSearched) {
       setName(urlName);
       setSex(urlSex);
       setShowMap(urlMap === "true");
@@ -95,21 +98,21 @@ function Search() {
 
   const exportToCsv = () => {
     if (data.length === 0) return;
-    
+
     const headers = ["Name", "Sex", "Amount", "Year"];
     const csvContent = [
-      headers.join(','),
-      ...data.map(item => 
-        `${item.name},${item.sex},${item.amount},${item.year}`
-      )
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      headers.join(","),
+      ...data.map(
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${submittedName}-${submittedSex}.csv`);
-    link.style.visibility = 'hidden';
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${submittedName}-${submittedSex}.csv`);
+    link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -117,6 +120,7 @@ function Search() {
   };
 
   if (!hasSearched) {
+    const { theme, setTheme } = useTheme();
     return (
       <motion.div
         className={`${inter.className}`}
@@ -197,10 +201,25 @@ function Search() {
                   </motion.span>
                 </Button>
               </motion.div>
-              <div className="flex justify-center items-center text-sm text-muted-foreground">
+              <div className="flex justify-center items-center text-sm text-muted-foreground flex-row gap-2">
                 <Link href="/popular" className="underline">
                   Popular Names
                 </Link>
+                {" | "}
+                <button
+                  onClick={() =>
+                    setTheme(
+                      theme === "dark"
+                        ? "light"
+                        : theme === "system"
+                        ? "light"
+                        : "dark"
+                    )
+                  }
+                  className="underline"
+                >
+                  Change Theme
+                </button>
               </div>
             </form>
           </div>
@@ -269,9 +288,9 @@ function Search() {
           {data.length > 0 ? (
             <div className="container mx-auto">
               <div className="flex justify-end mb-3">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={exportToCsv}
                   className="flex items-center gap-2"
                 >
@@ -301,8 +320,12 @@ function Search() {
               </Table>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center">
+            <div className="h-full flex items-center justify-center flex-col">
               <p className="text-muted-foreground">No results found</p>
+              <p className="text-gray-400 text-sm">
+                Years with under five occurances are not shown for privacy
+                reasons
+              </p>
             </div>
           )}
         </div>

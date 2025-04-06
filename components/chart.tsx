@@ -144,7 +144,7 @@ export default function Chart({ name, sex }: ChartProps) {
               <p className="text-destructive">{error}</p>
             </div>
           ) : filteredData.length === 0 ? (
-            <div className="flex h-[250px] items-center justify-center">
+            <div className="flex h-[250px] items-center justify-center text-muted-foreground">
               <p>No data available for the selected time range.</p>
             </div>
           ) : (
