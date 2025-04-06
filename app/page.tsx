@@ -300,12 +300,14 @@ function Search() {
             </motion.div>
           </form>
         </TopBar>
-        <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
-          <div className="w-full pb-3 md:pb-0">
-            <Chart name={submittedName} sex={submittedSex} />
+        {data.length > 0 && (
+          <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
+            <div className="w-full pb-3 md:pb-0">
+              <Chart name={submittedName} sex={submittedSex} />
+            </div>
+            {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
           </div>
-          {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
-        </div>
+        )}
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (
             <div className="container mx-auto">
