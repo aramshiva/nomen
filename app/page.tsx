@@ -28,6 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
 import { Download } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -57,6 +58,23 @@ function Search() {
   const [hasSearched, setHasSearched] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
   const [submittedSex, setSubmittedSex] = useState("");
+  const { theme, setTheme } = useTheme();
+
+  const performSearch = async (searchName: string, searchSex: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/names?name=${searchName}&sex=${searchSex}`);
+      const result = await response.json();
+      setData(result);
+      setHasSearched(true);
+      setSubmittedName(searchName);
+      setSubmittedSex(searchSex);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -68,48 +86,56 @@ function Search() {
     if (showMap) url.searchParams.set("map", "true");
     window.history.pushState({}, "", url);
 
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/names?name=${name}&sex=${sex}`);
-      const result = await response.json();
-      setData(result);
-      setHasSearched(true);
-      setSubmittedName(name);
-      setSubmittedSex(sex);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    await performSearch(name, sex);
   };
 
   useEffect(() => {
-    if (urlName && urlSex) {
+    const handlePopState = () => {
+      const currentUrl = new URL(window.location.href);
+      const currentName = currentUrl.searchParams.get("name");
+      const currentSex = currentUrl.searchParams.get("sex");
+      
+      if (currentName && currentSex) {
+        setName(currentName);
+        setSex(currentSex);
+        performSearch(currentName, currentSex);
+      } else {
+        setHasSearched(false);
+        setData([]);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (urlName && urlSex && !hasSearched) {
       setName(urlName);
       setSex(urlSex);
       setShowMap(urlMap === "true");
-      handleSearch();
+      performSearch(urlName, urlSex);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlName, urlSex, urlMap]);
 
   const exportToCsv = () => {
     if (data.length === 0) return;
-    
+
     const headers = ["Name", "Sex", "Amount", "Year"];
     const csvContent = [
-      headers.join(','),
-      ...data.map(item => 
-        `${item.name},${item.sex},${item.amount},${item.year}`
-      )
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      headers.join(","),
+      ...data.map(
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${submittedName}-${submittedSex}.csv`);
-    link.style.visibility = 'hidden';
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${submittedName}-${submittedSex}.csv`);
+    link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -197,10 +223,25 @@ function Search() {
                   </motion.span>
                 </Button>
               </motion.div>
-              <div className="flex justify-center items-center text-sm text-muted-foreground">
+              <div className="flex justify-center items-center text-sm text-muted-foreground flex-row gap-2">
                 <Link href="/popular" className="underline">
                   Popular Names
                 </Link>
+                {" | "}
+                <button
+                  onClick={() =>
+                    setTheme(
+                      theme === "dark"
+                        ? "light"
+                        : theme === "system"
+                        ? "light"
+                        : "dark"
+                    )
+                  }
+                  className="underline"
+                >
+                  Change Theme
+                </button>
               </div>
             </form>
           </div>
@@ -259,19 +300,21 @@ function Search() {
             </motion.div>
           </form>
         </TopBar>
-        <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
-          <div className="w-full pb-3 md:pb-0">
-            <Chart name={submittedName} sex={submittedSex} />
+        {data.length > 0 && (
+          <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
+            <div className="w-full pb-3 md:pb-0">
+              <Chart name={submittedName} sex={submittedSex} />
+            </div>
+            {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
           </div>
-          {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
-        </div>
+        )}
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (
             <div className="container mx-auto">
               <div className="flex justify-end mb-3">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={exportToCsv}
                   className="flex items-center gap-2"
                 >
@@ -301,8 +344,12 @@ function Search() {
               </Table>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center">
+            <div className="h-full flex items-center justify-center flex-col">
               <p className="text-muted-foreground">No results found</p>
+              <p className="text-gray-400 text-sm">
+                Years with under five occurances are not shown for privacy
+                reasons
+              </p>
             </div>
           )}
         </div>

@@ -4,7 +4,9 @@ import { AnimatePresence } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,7 +36,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <AnimatePresence>{children}</AnimatePresence>
+          <AnimatePresence>
+            <TooltipProvider>{children}</TooltipProvider>
+          </AnimatePresence>
+          <Toaster />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
