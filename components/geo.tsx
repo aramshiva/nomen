@@ -117,9 +117,14 @@ export default function Geo({
           amount: number;
         }
 
-        const maxAmount = Math.max(
-          ...data.map((item: StateDataItem) => item.amount),
-        );
+        // const maxAmount = Math.max(
+        //   ...data.map((item: StateDataItem) => item.amount),
+        // ); // sum of state with the highest qualifying citizens
+
+        const maxAmount = data.reduce(
+          (sum: number, item: StateDataItem) => sum + item.amount,
+          0,
+        ); // sum of all citizens counted
 
         interface ProcessedStateData {
           state: string;
