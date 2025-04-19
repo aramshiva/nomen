@@ -6,7 +6,6 @@ import {
   CardContent,
 } from "./ui/card";
 import Geo from "./geo";
-import { Badge } from "./ui/badge";
 import { useTheme } from "next-themes";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 

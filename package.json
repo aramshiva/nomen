@@ -29,7 +29,7 @@
     "drizzle-kit": "^0.30.5",
     "drizzle-orm": "^0.40.0",
     "dropdown-menu": "^0.1.1",
-    "lucide-react": "^0.482.0",
+    "lucide-react": "^0.501.0",
     "motion": "^12.5.0",
     "mysql2": "^3.13.0",
     "next": "14.2.9",

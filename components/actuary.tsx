@@ -5,14 +5,12 @@ import {
     CardDescription,
     CardContent,
   } from "./ui/card";
-  import Geo from "./geo";
   import { Badge } from "./ui/badge";
   import { useTheme } from "next-themes";
   import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
   import { useEffect, useState } from "react";
   
   export default function Actuary({ sex, name }: { sex: string; name: string }) {
-    const { theme } = useTheme();
     const [peopleAlive, setPeopleAlive] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
