@@ -6,7 +6,6 @@ import {
   CardContent,
 } from "./ui/card";
 import Geo from "./geo";
-import { Badge } from "./ui/badge";
 import { useTheme } from "next-themes";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 
@@ -23,9 +22,6 @@ export default function Heatmap({ sex, name }: { sex: string; name: string }) {
               <CardTitle>
                 {submittedName} {submittedSex ? `(${submittedSex})` : ""} -
                 Heatmap
-                <Badge variant="secondary" className="ml-2">
-                  Beta
-                </Badge>
               </CardTitle>
               <CardDescription>
                 Showing name frequency across states from 1910 and later.

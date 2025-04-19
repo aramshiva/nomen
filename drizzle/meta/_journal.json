@@ -50,6 +50,20 @@
       "when": 1742355909813,
       "tag": "0006_watery_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1745041023663,
+      "tag": "0007_fast_squadron_sinister",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1745041104664,
+      "tag": "0008_pale_praxagora",
+      "breakpoints": true
     }
   ]
 }
