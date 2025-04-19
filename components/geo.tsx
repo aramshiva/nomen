@@ -117,10 +117,14 @@ export default function Geo({
           amount: number;
         }
 
-        const maxAmount = Math.max(
-          ...data.map((item: StateDataItem) => item.amount),
-        );
+        // const maxAmount = Math.max(
+        //   ...data.map((item: StateDataItem) => item.amount),
+        // ); // sum of state with the highest qualifying citizens
 
+        let maxAmount = data.reduce(
+          (sum: number, item: StateDataItem) => sum + item.amount,
+          0,
+        ) * 0.4; // sum of all citizens counted
         interface ProcessedStateData {
           state: string;
           value: number;
@@ -175,9 +179,20 @@ export default function Geo({
       if (!us || !svgRef.current) return;
 
       d3.select(svgRef.current).selectAll("*").remove();
-
+      
       const color = d3.scaleQuantize<string>().domain([0, 100]);
-      color.range(["#4a6b85", "#3d7bb0", "#2b8fd6", "#1ca3f2", "#0db7ff"]);
+      color.range([
+        "#4a6b85",
+        "#3d7bb0",
+        "#2b8fd6",
+        "#1ca3f2",
+        "#0db7ff",
+        "#0aa2e6",
+        "#088bcc",
+        "#0673b3",
+        "#045c99",
+        "#034580",
+      ]);
       // color.range(["#56ebd3", "#33837f", "#85c2d4", "#155392", "#0494fb"]);
 
       const scaleFactor = numericHeight / 610;
