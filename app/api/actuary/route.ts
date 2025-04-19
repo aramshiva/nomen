@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
                 message: "Gender must be either 'M' or 'F'" 
             },
             { status: 400 },
+        );
     }
 
     try {
