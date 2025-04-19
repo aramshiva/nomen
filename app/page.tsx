@@ -203,7 +203,7 @@ function Search() {
                     onClick={() => setShowActuary(!showActuary)}
                   />
                   <label htmlFor="show-actuary" className="ml-2 cursor-pointer">
-                    Show Actuary
+                    Show Actuary Data
                   </label>
                   <Badge variant="secondary" className="ml-2">
                     Beta
