@@ -29,7 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
 import { Download } from "lucide-react";
 import { useTheme } from "next-themes";
-
+import Actuary from "@/components/actuary";
 const inter = Inter({ subsets: ["latin"] });
 
 interface NameData {
@@ -49,10 +49,10 @@ function Search() {
       : searchParams.get("sex")?.toLowerCase() === "female"
       ? "F"
       : "");
-  const urlMap = searchParams.get("map");
+  const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
-  const [showMap, setShowMap] = useState(urlMap === "true");
+  const [showActuary, setShowActuary] = useState(urlActuary === "true");
   const [data, setData] = useState<NameData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -83,7 +83,7 @@ function Search() {
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
     url.searchParams.set("sex", sex);
-    if (showMap) url.searchParams.set("map", "true");
+    if (showActuary) url.searchParams.set("actuary", "true");
     window.history.pushState({}, "", url);
 
     await performSearch(name, sex);
@@ -113,11 +113,11 @@ function Search() {
     if (urlName && urlSex && !hasSearched) {
       setName(urlName);
       setSex(urlSex);
-      setShowMap(urlMap === "true");
+      setShowActuary(urlActuary === "true");
       performSearch(urlName, urlSex);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlName, urlSex, urlMap]);
+  }, [urlName, urlSex, urlActuary]);
 
   const exportToCsv = () => {
     if (data.length === 0) return;
@@ -198,12 +198,12 @@ function Search() {
                   className="flex items-center"
                 >
                   <Checkbox
-                    id="show-map"
-                    checked={showMap}
-                    onClick={() => setShowMap(!showMap)}
+                    id="show-actuary"
+                    checked={showActuary}
+                    onClick={() => setShowActuary(!showActuary)}
                   />
-                  <label htmlFor="show-map" className="ml-2 cursor-pointer">
-                    Show Map
+                  <label htmlFor="show-actuary" className="ml-2 cursor-pointer">
+                    Show Actuary
                   </label>
                   <Badge variant="secondary" className="ml-2">
                     Beta
@@ -301,12 +301,19 @@ function Search() {
           </form>
         </TopBar>
         {data.length > 0 && (
-          <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
-            <div className="w-full pb-3 md:pb-0">
-              <Chart name={submittedName} sex={submittedSex} />
+          <>
+            <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
+              <div className="w-full pb-3 md:pb-0">
+                <Chart name={submittedName} sex={submittedSex} />
+              </div>
+              <Heatmap sex={submittedSex} name={submittedName} />
             </div>
-            {showMap && <Heatmap sex={submittedSex} name={submittedName} />}
-          </div>
+              <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
+              <div className="w-full pb-3 md:pb-0">
+              {showActuary && <Actuary name={submittedName} sex={submittedSex} />}
+              </div>
+            </div>
+          </>
         )}
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (

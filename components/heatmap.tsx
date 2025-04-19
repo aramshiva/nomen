@@ -23,9 +23,6 @@ export default function Heatmap({ sex, name }: { sex: string; name: string }) {
               <CardTitle>
                 {submittedName} {submittedSex ? `(${submittedSex})` : ""} -
                 Heatmap
-                <Badge variant="secondary" className="ml-2">
-                  Beta
-                </Badge>
               </CardTitle>
               <CardDescription>
                 Showing name frequency across states from 1910 and later.

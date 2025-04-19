@@ -1,33 +1,41 @@
-import { mysqlTable, varchar, char, int } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, char, int, mysqlEnum } from "drizzle-orm/mysql-core";
 
 export const names = mysqlTable("names", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey().default(""),
+  name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
   sex: char("sex", { length: 1 }).notNull().default(""),
-  amount: int("amount").notNull().default(0),
-  year: int("year").notNull().default(0),
-}); // default names db
+  amount: int("amount").notNull(),
+  year: int("year").notNull(),
+});
 
 export const namesbyarea = mysqlTable("namesbyarea", {
-  name: varchar("name", { length: 255 }).notNull().primaryKey().default(""),
+  name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
   sex: char("sex", { length: 1 }).notNull().default(""),
-  amount: int("amount").notNull().default(0),
-  year: int("year").notNull().default(0),
-  state: char("state", { length: 2 }).notNull().default(""),
-}); // name db but with a state column
+  amount: int("amount").notNull(),
+  year: int("year").notNull(),
+  state: char("state", { length: 2 }).notNull(),
+});
 
 export const uniquenames = mysqlTable("uniquenames", {
   name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
-}); // only names
+});
 
 export const unique_names = mysqlTable("unique_names", {
   name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
-  amount: int("amount").notNull().default(0),
+  amount: int("amount").notNull(),
   sex: char("sex", { length: 1 }).notNull().default(""),
-}); // names with amount
+});
 
 export const uniquenamesbyarea = mysqlTable("uniquenamesbyarea", {
   name: varchar("name", { length: 25 }).notNull().primaryKey().default(""),
-  amount: int("amount").notNull().default(0),
+  amount: int("amount").notNull(),
   sex: char("sex", { length: 1 }).notNull().default(""),
-  state: char("state", { length: 2 }).notNull().default(""),
-}); // names with amount and state
+  state: char("state", { length: 2 }).notNull(),
+});
+
+export const actuary = mysqlTable("actuary", {
+  id: int("id").notNull().primaryKey(),
+  gender: mysqlEnum("gender", ["M", "F"]).notNull(),
+  year: int("year").notNull(),
+  age: int("age").notNull(),
+  probability_of_death: int("probability_of_death").notNull(),
+}); // actuary table
