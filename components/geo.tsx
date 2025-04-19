@@ -124,7 +124,7 @@ export default function Geo({
         let maxAmount = data.reduce(
           (sum: number, item: StateDataItem) => sum + item.amount,
           0,
-        ); // sum of all citizens counted
+        ) * 0.4; // sum of all citizens counted
         interface ProcessedStateData {
           state: string;
           value: number;
@@ -179,7 +179,7 @@ export default function Geo({
       if (!us || !svgRef.current) return;
 
       d3.select(svgRef.current).selectAll("*").remove();
-
+      
       const color = d3.scaleQuantize<string>().domain([0, 100]);
       color.range([
         "#4a6b85",
@@ -192,11 +192,6 @@ export default function Geo({
         "#0673b3",
         "#045c99",
         "#034580",
-        "#023a6e",
-        "#012f5c",
-        "#01244a",
-        "#001938",
-        "#001026",
       ]);
       // color.range(["#56ebd3", "#33837f", "#85c2d4", "#155392", "#0494fb"]);
 
