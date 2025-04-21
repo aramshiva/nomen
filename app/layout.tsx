@@ -19,6 +19,8 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+<meta name="apple-mobile-web-app-title" content="Nomen" />
+
 export const metadata: Metadata = {
   title: "Nomen",
   description:
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
     siteName: "Nomen",
     images: [
       {
-        url: "/brand/og.png",
+        url: "https://nomen.aram.sh/brand/og.png",
         width: 1200,
         height: 630,
         alt: "Nomen",
