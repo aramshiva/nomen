@@ -329,7 +329,7 @@ export default function Geo({
         d3.select(currentRef).selectAll("*").remove();
       }
     };
-  }, [height, width, stateData]);
+  }, [height, width, stateData, theme]);
 
   const svgStyle = {
     width: typeof width === "number" ? `${width}px` : width,

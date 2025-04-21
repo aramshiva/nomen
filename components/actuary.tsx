@@ -82,7 +82,7 @@ import {
               </TooltipTrigger>
             </CardContent>
           <TooltipContent>
-            <p>Data is based of SSA's actuary database, may not be reliable.</p>
+            <p>Data is based of SSA&apos;s actuary database, may not be reliable.</p>
           </TooltipContent>
         </Tooltip>
       </Card>
