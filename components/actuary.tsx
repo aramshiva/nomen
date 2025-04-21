@@ -8,8 +8,9 @@ import {
   import { Badge } from "./ui/badge";
   import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
   import { useEffect, useState } from "react";
-  
-  export default function Actuary({ sex, name }: { sex: string; name: string }) {
+  import CountUp from 'react-countup';
+
+  export default function Numbers({ sex, name }: { sex: string; name: string }) {
     const [peopleAlive, setPeopleAlive] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +47,7 @@ import {
     return (
       <Card className="w-full pb-2">
         <Tooltip>
-            <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+            <CardHeader className="flex items-center gap-2 space-y-0 border-b pb-5 sm:flex-row">
               <div className="grid flex-1 gap-1 text-center sm:text-left">
                 <CardTitle>
                   {name} {sex ? `(${sex})` : ""} -
@@ -68,7 +69,10 @@ import {
                     "Loading..." : 
                     error ? 
                       "Error loading data" :
-                      peopleAlive.toLocaleString()
+                      <CountUp 
+                        end={peopleAlive} 
+                        separator="," 
+                      />
                   }
                 </p>
                 <p className="text-muted-foreground text-sm pb-5">
@@ -78,7 +82,7 @@ import {
               </TooltipTrigger>
             </CardContent>
           <TooltipContent>
-            <p>Data can be slightly inaccurate and may feature inconsistencies</p>
+            <p>Data is based of SSA's actuary database, may not be reliable.</p>
           </TooltipContent>
         </Tooltip>
       </Card>
