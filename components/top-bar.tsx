@@ -19,7 +19,7 @@ export function TopBar({
         <div className="flex items-center">
           <motion.a
             href="/"
-            className="font-bold mr-4 cursor-pointer"
+            className="font-bold mr-4 cursor-pointer text-2xl font-gosha lowercase pb-1"
             layoutId="title"
           >
             Nomen

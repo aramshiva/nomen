@@ -30,6 +30,7 @@ import Heatmap from "@/components/heatmap";
 import { Download } from "lucide-react";
 import { useTheme } from "next-themes";
 import Actuary from "@/components/actuary";
+import Numbers from "@/components/numbers";
 const inter = Inter({ subsets: ["latin"] });
 
 interface NameData {
@@ -63,7 +64,9 @@ function Search() {
   const performSearch = async (searchName: string, searchSex: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/names?name=${searchName}&sex=${searchSex}`);
+      const response = await fetch(
+        `/api/names?name=${searchName}&sex=${searchSex}`
+      );
       const result = await response.json();
       setData(result);
       setHasSearched(true);
@@ -94,7 +97,7 @@ function Search() {
       const currentUrl = new URL(window.location.href);
       const currentName = currentUrl.searchParams.get("name");
       const currentSex = currentUrl.searchParams.get("sex");
-      
+
       if (currentName && currentSex) {
         setName(currentName);
         setSex(currentSex);
@@ -105,8 +108,8 @@ function Search() {
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   useEffect(() => {
@@ -152,7 +155,9 @@ function Search() {
       >
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
           <div className="w-[30rem] max-w-full">
-            <motion.p className="font-bold text-xl">Nomen</motion.p>
+            <motion.p className="font-bold text-2xl font-gosha lowercase pb-1">
+              Nomen
+            </motion.p>
             <p className="text-muted-foreground text-sm pb-5">
               A parser for every name listed on a social security card between
               1880-2023, tabulated from the United States Social Security
@@ -301,19 +306,20 @@ function Search() {
           </form>
         </TopBar>
         {data.length > 0 && (
-          <>
-            <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
-              <div className="w-full pb-3 md:pb-0">
-                <Chart name={submittedName} sex={submittedSex} />
-              </div>
-              <Heatmap sex={submittedSex} name={submittedName} />
-            </div>
-              <div className="pt-3 px-2 sm:pt-5 sm:px-9 sm:pb-5 pb-3 md:flex md:flex-row md:gap-2">
-              <div className="w-full pb-3 md:pb-0">
-              {showActuary && <Actuary name={submittedName} sex={submittedSex} />}
-              </div>
-            </div>
-          </>
+          <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
+            <Chart name={submittedName} sex={submittedSex} />
+            <Heatmap sex={submittedSex} name={submittedName} />
+            {showActuary && (
+              <>
+                <div>
+                  <Actuary name={submittedName} sex={submittedSex} />
+                </div>
+                <div>
+                  <Numbers name={submittedName} sex={submittedSex} />
+                </div>
+              </>
+            )}
+          </div>
         )}
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (
@@ -369,7 +375,7 @@ function Fallback() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <div className="w-[30rem] max-w-full">
-        <p className="font-bold text-xl">Nomen</p>
+        <p className="font-bold text-2xl font-gosha lowercase">Nomen</p>
         <p className="text-muted-foreground text-sm pb-5">Loading...</p>
       </div>
     </div>

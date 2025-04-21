@@ -89,3 +89,43 @@
     --chart-5: 212 97% 87%;
   }
 }
+
+@font-face {
+  font-family: 'Gosha';
+  src: url('/fonts/pp-gosha-sans/PPGoshaSans-Thin.woff2') format('woff2'),
+       url('/fonts/pp-gosha-sans/PPGoshaSans-Thin.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gosha';
+  src: url('/fonts/pp-gosha-sans/PPGoshaSans-Ultralight.woff2') format('woff2'),
+       url('/fonts/pp-gosha-sans/PPGoshaSans-Ultralight.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gosha';
+  src: url('/fonts/pp-gosha-sans/PPGoshaSans-Regular.woff2') format('woff2'),
+       url('/fonts/pp-gosha-sans/PPGoshaSans-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gosha';
+  src: url('/fonts/pp-gosha-sans/PPGoshaSans-Bold.woff2') format('woff2'),
+       url('/fonts/pp-gosha-sans/PPGoshaSans-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gosha';
+  src: url('/fonts/pp-gosha-sans/PPGoshaSans-Ultrabold.woff2') format('woff2'),
+       url('/fonts/pp-gosha-sans/PPGoshaSans-Ultrabold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+}
