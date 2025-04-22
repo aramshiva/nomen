@@ -48,8 +48,8 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
@@ -65,7 +65,7 @@ function Search() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`
+        `/api/names?name=${searchName}&sex=${searchSex}`,
       );
       const result = await response.json();
       setData(result);
@@ -129,7 +129,7 @@ function Search() {
     const csvContent = [
       headers.join(","),
       ...data.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
       ),
     ].join("\n");
 
@@ -239,8 +239,8 @@ function Search() {
                       theme === "dark"
                         ? "light"
                         : theme === "system"
-                        ? "light"
-                        : "dark"
+                          ? "light"
+                          : "dark",
                     )
                   }
                   className="underline"

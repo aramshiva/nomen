@@ -26,11 +26,12 @@ export default function About() {
               Adminstration{"'"}s data.
             </p>
             <p className="text-foreground">
-              thanks for using nomen!<br />
+              thanks for using nomen!
+              <br />
               nomen was made by{" "}
               <span className="items-center gap-1 inline-flex">
-              <SiGithub />
-              <Link href="https://github.com/aramshiva">@aramshiva</Link>
+                <SiGithub />
+                <Link href="https://github.com/aramshiva">@aramshiva</Link>
               </span>
             </p>
             <div className="pt-3" />

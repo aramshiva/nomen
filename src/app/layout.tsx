@@ -19,7 +19,7 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-<meta name="apple-mobile-web-app-title" content="Nomen" />
+<meta name="apple-mobile-web-app-title" content="Nomen" />;
 
 export const metadata: Metadata = {
   title: "Nomen",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
         alt: "Nomen",
       },
     ],
-  }
+  },
 };
 
 export default function RootLayout({
