@@ -3,10 +3,10 @@ import localFont from "next/font/local";
 import { AnimatePresence } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ThemeProvider } from "@/src/components/theme-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { TooltipProvider } from "@/src/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,7 +19,7 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-<meta name="apple-mobile-web-app-title" content="Nomen" />;
+<meta name="apple-mobile-web-app-title" content="Nomen" />
 
 export const metadata: Metadata = {
   title: "Nomen",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
         alt: "Nomen",
       },
     ],
-  },
+  }
 };
 
 export default function RootLayout({
