@@ -287,6 +287,10 @@ function Search() {
                 </Button>
               </motion.div>
               <div className="flex justify-center items-center text-sm text-muted-foreground flex-row gap-2">
+                <Link href="/" className="underline">
+                  Home
+                </Link>
+                {" | "}
                 <Link href="/popular" className="underline">
                   Popular Names
                 </Link>
