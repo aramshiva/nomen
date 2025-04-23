@@ -233,6 +233,10 @@ function Search() {
                   Popular Names
                 </Link>
                 {" | "}
+                <Link href="/compare" className="underline">
+                  Compare Names
+                </Link>
+                {" | "}
                 <button
                   onClick={() =>
                     setTheme(
