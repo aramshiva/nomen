@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        gosha: ['Gosha', 'Inter', 'sans'],
+        gosha: ["Gosha", "Inter", "sans"],
       },
       colors: {
         background: "hsl(var(--background))",

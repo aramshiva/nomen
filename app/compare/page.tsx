@@ -26,6 +26,7 @@ import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/top-bar";
 import { Download } from "lucide-react";
 import { useTheme } from "next-themes";
+import { toast } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 interface NameData {
@@ -43,18 +44,18 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlName1 = searchParams.get("name1");
   const urlSex1 =
     searchParams.get("sex1")?.toUpperCase() ||
     (searchParams.get("sex1")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex1")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlActuary = searchParams.get("actuary");
-  
+
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
   const [name1, setName1] = useState(urlName1 || "");
@@ -70,14 +71,18 @@ function Search() {
   const [submittedSex1, setSubmittedSex1] = useState("");
   const { theme, setTheme } = useTheme();
 
-  const performSearch = async (searchName: string, searchSex: string, isSecond = false) => {
+  const performSearch = async (
+    searchName: string,
+    searchSex: string,
+    isSecond = false,
+  ) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`
+        `/api/names?name=${searchName}&sex=${searchSex}`,
       );
       const result = await response.json();
-      
+
       if (isSecond) {
         setData1(result);
         setSubmittedName1(searchName);
@@ -87,7 +92,7 @@ function Search() {
         setSubmittedName(searchName);
         setSubmittedSex(searchSex);
       }
-      
+
       if (!hasSearched) {
         setHasSearched(true);
       }
@@ -100,7 +105,10 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!name || !sex || !name1 || !sex1) return;
+    if (!name || !sex || !name1 || !sex1) {
+      toast("Please fill out all the fields");
+      return;
+    }
 
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
@@ -130,7 +138,7 @@ function Search() {
         setName(currentName);
         setSex(currentSex);
         performSearch(currentName, currentSex);
-        
+
         if (currentName1 && currentSex1) {
           setName1(currentName1);
           setSex1(currentSex1);
@@ -153,7 +161,7 @@ function Search() {
       setSex(urlSex);
       setShowActuary(urlActuary === "true");
       performSearch(urlName, urlSex);
-      
+
       if (urlName1 && urlSex1) {
         setName1(urlName1);
         setSex1(urlSex1);
@@ -167,14 +175,14 @@ function Search() {
     const dataToExport = dataSet === 0 ? data : data1;
     const nameToExport = dataSet === 0 ? submittedName : submittedName1;
     const sexToExport = dataSet === 0 ? submittedSex : submittedSex1;
-    
+
     if (dataToExport.length === 0) return;
 
     const headers = ["Name", "Sex", "Amount", "Year"];
     const csvContent = [
       headers.join(","),
       ...dataToExport.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
       ),
     ].join("\n");
 
@@ -204,7 +212,8 @@ function Search() {
               Nomen <span className="text-lg">COMPARE</span>
             </motion.p>
             <p className="text-muted-foreground text-sm pb-5">
-              Compare trends between two names from 1880-2023, using data from the United States Social Security Administration.
+              Compare trends between two names from 1880-2023, using data from
+              the United States Social Security Administration.
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -225,7 +234,10 @@ function Search() {
                       />
                     </motion.div>
                   </motion.div>
-                  <motion.div className="flex flex-col space-y-2" layoutId="sex-select-container">
+                  <motion.div
+                    className="flex flex-col space-y-2"
+                    layoutId="sex-select-container"
+                  >
                     <p>Sex:</p>
                     <motion.div layoutId="sex-select">
                       <Select value={sex} onValueChange={setSex}>
@@ -257,7 +269,10 @@ function Search() {
                       />
                     </motion.div>
                   </motion.div>
-                  <motion.div className="flex flex-col space-y-2" layoutId="sex1-select-container">
+                  <motion.div
+                    className="flex flex-col space-y-2"
+                    layoutId="sex1-select-container"
+                  >
                     <p>Sex:</p>
                     <motion.div layoutId="sex1-select">
                       <Select value={sex1} onValueChange={setSex1}>
@@ -301,8 +316,8 @@ function Search() {
                       theme === "dark"
                         ? "light"
                         : theme === "system"
-                        ? "light"
-                        : "dark"
+                          ? "light"
+                          : "dark",
                     )
                   }
                   className="underline"
@@ -321,76 +336,76 @@ function Search() {
     <>
       <div className={inter.className + " min-h-screen flex flex-col"}>
         <TopBar>
-            <form
+          <form
             onSubmit={handleSearch}
             className="flex-1 flex flex-col md:flex-row gap-4 items-start"
-            >
+          >
             <div className="w-full md:w-1/3 grid grid-cols-2 gap-2">
               <motion.div layoutId="name-input-container">
-              <motion.div layoutId="name-input">
-                <Input
-                type="text"
-                placeholder="First name"
-                aria-label="Name search"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                />
-              </motion.div>
+                <motion.div layoutId="name-input">
+                  <Input
+                    type="text"
+                    placeholder="First name"
+                    aria-label="Name search"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </motion.div>
               </motion.div>
               <motion.div layoutId="sex-select-container">
-              <motion.div layoutId="sex-select">
-                <Select value={sex} onValueChange={setSex}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sex" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="M">Male</SelectItem>
-                  <SelectItem value="F">Female</SelectItem>
-                </SelectContent>
-                </Select>
-              </motion.div>
+                <motion.div layoutId="sex-select">
+                  <Select value={sex} onValueChange={setSex}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sex" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </motion.div>
               </motion.div>
             </div>
             <div className="w-full md:w-1/3 grid grid-cols-2 gap-2">
               <motion.div layoutId="name1-input-container">
-              <motion.div layoutId="name1-input">
-                <Input
-                type="text"
-                placeholder="Second name"
-                aria-label="Second name search"
-                value={name1}
-                onChange={(e) => setName1(e.target.value)}
-                />
-              </motion.div>
+                <motion.div layoutId="name1-input">
+                  <Input
+                    type="text"
+                    placeholder="Second name"
+                    aria-label="Second name search"
+                    value={name1}
+                    onChange={(e) => setName1(e.target.value)}
+                  />
+                </motion.div>
               </motion.div>
               <motion.div layoutId="sex1-select-container">
-              <motion.div layoutId="sex1-select">
-                <Select value={sex1} onValueChange={setSex1}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sex" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="M">Male</SelectItem>
-                  <SelectItem value="F">Female</SelectItem>
-                </SelectContent>
-                </Select>
-              </motion.div>
+                <motion.div layoutId="sex1-select">
+                  <Select value={sex1} onValueChange={setSex1}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sex" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </motion.div>
               </motion.div>
             </div>
             <motion.div layoutId="search-button">
               <Button type="submit" disabled={isLoading}>
-              <motion.span
-                key={isLoading ? "loading" : "idle"}
-                initial={{ opacity: 0, filter: "blur(4px)" }}
-                animate={{ opacity: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, filter: "blur(4px)" }}
-                transition={{ duration: 0.6 }}
-              >
-                {isLoading ? "Searching..." : "Compare"}
-              </motion.span>
+                <motion.span
+                  key={isLoading ? "loading" : "idle"}
+                  initial={{ opacity: 0, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, filter: "blur(4px)" }}
+                  transition={{ duration: 0.6 }}
+                >
+                  {isLoading ? "Searching..." : "Compare"}
+                </motion.span>
               </Button>
             </motion.div>
-            </form>
+          </form>
         </TopBar>
         {data.length > 0 && (
           <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 gap-3 md:gap-2">
@@ -412,11 +427,15 @@ function Search() {
             )} */}
           </div>
         )}
-        
+
         <div className="md:hidden p-4 text-center">
           <div className="bg-secondary/30 rounded-lg p-4">
-            <p className="text-muted-foreground">Full data access is not compatible on mobile at the moment</p>
-            <p className="text-xs mt-2">Please view on a larger screen for detailed tables</p>
+            <p className="text-muted-foreground">
+              Full data access is not compatible on mobile at the moment
+            </p>
+            <p className="text-xs mt-2">
+              Please view on a larger screen for detailed tables
+            </p>
           </div>
         </div>
 
@@ -425,7 +444,9 @@ function Search() {
             {data.length > 0 ? (
               <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-md font-medium pl-2">{submittedName} ({submittedSex})</h3>
+                  <h3 className="text-md font-medium pl-2">
+                    {submittedName} ({submittedSex})
+                  </h3>
                   <Button
                     variant="outline"
                     size="sm"
@@ -448,10 +469,14 @@ function Search() {
                   <TableBody>
                     {data.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.name}
+                        </TableCell>
                         <TableCell>{item.sex}</TableCell>
                         <TableCell>{item.amount}</TableCell>
-                        <TableCell className="text-right">{item.year}</TableCell>
+                        <TableCell className="text-right">
+                          {item.year}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -467,12 +492,14 @@ function Search() {
               </div>
             )}
           </div>
-          
+
           <div className="flex-1 overflow-auto">
             {data1.length > 0 ? (
               <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-md font-medium pl-2">{submittedName1} ({submittedSex1})</h3>
+                  <h3 className="text-md font-medium pl-2">
+                    {submittedName1} ({submittedSex1})
+                  </h3>
                   <Button
                     variant="outline"
                     size="sm"
@@ -495,10 +522,14 @@ function Search() {
                   <TableBody>
                     {data1.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.name}
+                        </TableCell>
                         <TableCell>{item.sex}</TableCell>
                         <TableCell>{item.amount}</TableCell>
-                        <TableCell className="text-right">{item.year}</TableCell>
+                        <TableCell className="text-right">
+                          {item.year}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -531,7 +562,9 @@ function Fallback() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <div className="w-[30rem] max-w-full">
-        <p className="font-bold text-2xl font-gosha lowercase">nomen <span className="">compare</span></p>
+        <p className="font-bold text-2xl font-gosha lowercase">
+          nomen <span className="">compare</span>
+        </p>
         <p className="text-muted-foreground text-sm pb-5">Loading...</p>
       </div>
     </div>

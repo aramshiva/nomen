@@ -31,6 +31,7 @@ import { Download } from "lucide-react";
 import { useTheme } from "next-themes";
 import Actuary from "@/components/actuary";
 import Numbers from "@/components/numbers";
+import { toast } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 interface NameData {
@@ -48,8 +49,8 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
@@ -65,7 +66,7 @@ function Search() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`
+        `/api/names?name=${searchName}&sex=${searchSex}`,
       );
       const result = await response.json();
       setData(result);
@@ -81,7 +82,10 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!name || !sex) return;
+    if (!name || !sex) {
+      toast("Enter a name and select a sex to search");
+      return;
+    }
 
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
@@ -129,7 +133,7 @@ function Search() {
     const csvContent = [
       headers.join(","),
       ...data.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
       ),
     ].join("\n");
 
@@ -243,8 +247,8 @@ function Search() {
                       theme === "dark"
                         ? "light"
                         : theme === "system"
-                        ? "light"
-                        : "dark"
+                          ? "light"
+                          : "dark",
                     )
                   }
                   className="underline"

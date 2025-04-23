@@ -66,21 +66,23 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
       try {
         const fetchNameData = async (name: string, sex?: string) => {
           if (!name) return [];
-          
+
           let url = `/api/names?name=${encodeURIComponent(name)}`;
           if (sex) {
             url += `&sex=${encodeURIComponent(sex)}`;
           }
           const response = await fetch(url);
           if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
+            throw new Error(
+              `API request failed with status ${response.status}`,
+            );
           }
           return response.json();
         };
 
         const data1 = await fetchNameData(name, sex);
         setChartData1(data1);
-        
+
         if (name1) {
           const data2 = await fetchNameData(name1, sex1);
           setChartData2(data2);
@@ -120,26 +122,31 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
 
   const prepareChartData = () => {
     const allYears = new Set<number>();
-    filteredData1.forEach(item => allYears.add(item.year));
-    filteredData2.forEach(item => allYears.add(item.year));
-    
-    const yearMap: Record<number, { year: number, amount1?: number, amount2?: number }> = {};
-    
-    Array.from(allYears).sort().forEach(year => {
-      yearMap[year] = { year };
-    });
-    
-    filteredData1.forEach(item => {
+    filteredData1.forEach((item) => allYears.add(item.year));
+    filteredData2.forEach((item) => allYears.add(item.year));
+
+    const yearMap: Record<
+      number,
+      { year: number; amount1?: number; amount2?: number }
+    > = {};
+
+    Array.from(allYears)
+      .sort()
+      .forEach((year) => {
+        yearMap[year] = { year };
+      });
+
+    filteredData1.forEach((item) => {
       yearMap[item.year].amount1 = item.amount;
     });
-    
-    filteredData2.forEach(item => {
+
+    filteredData2.forEach((item) => {
       yearMap[item.year].amount2 = item.amount;
     });
-    
+
     return Object.values(yearMap).sort((a, b) => a.year - b.year);
   };
-  
+
   const combinedData = prepareChartData();
 
   return (
@@ -148,10 +155,13 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>
             {name} {sex ? `(${sex})` : ""}
-            {name1 ? ` vs ${name1} ${sex1 ? `(${sex1})` : ""}` : ""} - Historical Data
+            {name1 ? ` vs ${name1} ${sex1 ? `(${sex1})` : ""}` : ""} -
+            Historical Data
           </CardTitle>
           <CardDescription>
-            {name1 ? "Comparing name frequencies over time" : "Name frequency over time"}
+            {name1
+              ? "Comparing name frequencies over time"
+              : "Name frequency over time"}
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
@@ -241,7 +251,8 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                       indicator="dot"
                       formatter={(value, dataKey, props) => {
                         const year = props.payload.year;
-                        const displayName = dataKey === "amount1" ? name : name1;
+                        const displayName =
+                          dataKey === "amount1" ? name : name1;
                         return [
                           `${value}`,
                           ` people named ${displayName} were born in ${year}`,
@@ -250,7 +261,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                     />
                   }
                 />
-                
+
                 <Area
                   name={name}
                   dataKey="amount1"
@@ -259,7 +270,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                   stroke="var(--color-amount)"
                   connectNulls={true}
                 />
-                
+
                 {name1 && (
                   <Area
                     name={name1}
@@ -270,7 +281,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                     connectNulls={true}
                   />
                 )}
-                
+
                 <ChartLegend content={<ChartLegendContent />} />
               </AreaChart>
             </ChartContainer>
