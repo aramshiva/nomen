@@ -100,7 +100,7 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!name || !sex) return;
+    if (!name || !sex || !name1 || !sex1) return;
 
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
