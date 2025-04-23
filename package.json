@@ -38,7 +38,6 @@
     "react": "^18",
     "react-countup": "^6.5.3",
     "react-dom": "^18",
-    "react-icons": "^5.5.0",
     "recharts": "^2.15.1",
     "shadcn": "^2.4.0-canary.17",
     "sonner": "^2.0.1",
