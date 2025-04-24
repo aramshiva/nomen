@@ -31,7 +31,7 @@ interface NameData {
   year: number;
 }
 
-const getChartConfig = (name: string, name1?: string): ChartConfig => ({
+const getChartConfig = (name: string): ChartConfig => ({
   amount: {
     label: name,
     color: "hsl(var(--chart-1))",
