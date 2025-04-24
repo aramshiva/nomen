@@ -19,16 +19,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    let conditions = eq(names.year, parseInt(year));
-
+    let condition;
     if (sex && sex !== "all") {
-      conditions = and(conditions, eq(names.sex, sex));
+      condition = and(eq(names.year, parseInt(year)), eq(names.sex, sex));
+    } else {
+      condition = eq(names.year, parseInt(year));
     }
 
     const query = db
       .select()
       .from(names)
-      .where(conditions);
+      .where(condition);
 
     const result = await query
       .orderBy(desc(names.amount))
