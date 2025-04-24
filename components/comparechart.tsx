@@ -31,7 +31,7 @@ interface NameData {
   year: number;
 }
 
-const getChartConfig = (): ChartConfig => ({
+const chartConfig = {
   amount: {
     label: "Amount",
     color: "hsl(var(--chart-1))",
@@ -40,7 +40,7 @@ const getChartConfig = (): ChartConfig => ({
     label: "Amount",
     color: "hsl(var(--chart-2))",
   },
-});
+} satisfies ChartConfig;
 
 interface ChartProps {
   name: string;
@@ -204,7 +204,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
             </div>
           ) : (
             <ChartContainer
-              config={getChartConfig()}
+              config={chartConfig}
               className="aspect-auto h-[250px] w-full"
             >
               <AreaChart data={combinedData}>
@@ -242,10 +242,10 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                   tickMargin={8}
                   minTickGap={32}
                 />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
-            />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dot" />}
+                />
 
                 <Area
                   name={name}
@@ -255,19 +255,14 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                   stroke="var(--color-amount)"
                   connectNulls={true}
                 />
-
-                {name1 && (
-                  <Area
-                    name={name1}
-                    dataKey="amount2"
-                    type="monotone"
-                    fill="url(#fillAmount2)"
-                    stroke="var(--color-amount1)"
-                    connectNulls={true}
-                  />
-                )}
-
-                {/* <ChartLegend content={<ChartLegendContent />} /> */}
+                <Area
+                  name={name1}
+                  dataKey="amount2"
+                  type="monotone"
+                  fill="url(#fillAmount2)"
+                  stroke="var(--color-amount1)"
+                  connectNulls={true}
+                />
               </AreaChart>
             </ChartContainer>
           )}

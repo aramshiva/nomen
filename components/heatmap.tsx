@@ -17,24 +17,24 @@ export default function Heatmap({ sex, name }: { sex: string; name: string }) {
   return (
     <Card className="w-full pb-2">
       <Tooltip>
-          <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-            <div className="grid flex-1 gap-1 text-center sm:text-left">
-              <CardTitle>
-                {submittedName} {submittedSex ? `(${submittedSex})` : ""} -
-                Heatmap
-              </CardTitle>
-              <CardDescription>
-                Showing name frequency across states from 1910 and later.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center h-full pb-[4rem]">
+        <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+          <div className="grid flex-1 gap-1 text-center sm:text-left">
+            <CardTitle>
+              {submittedName} {submittedSex ? `(${submittedSex})` : ""} -
+              Heatmap
+            </CardTitle>
+            <CardDescription>
+              Showing name frequency across states from 1910 and later.
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center h-full pb-[4rem]">
           <TooltipTrigger>
             <div className="w-[20rem] md:w-[25rem]">
               <Geo theme={theme} sex={submittedSex} name={submittedName} />
             </div>
-            </TooltipTrigger>
-          </CardContent>
+          </TooltipTrigger>
+        </CardContent>
         <TooltipContent>
           <p>Data can be slightly inaccurate and may feature inconsistencies</p>
         </TooltipContent>

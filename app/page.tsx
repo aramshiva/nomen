@@ -28,7 +28,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
 import { Download } from "lucide-react";
-import { useTheme } from "next-themes";
 import Actuary from "@/components/actuary";
 import Numbers from "@/components/numbers";
 const inter = Inter({ subsets: ["latin"] });
@@ -48,8 +47,8 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
@@ -59,13 +58,12 @@ function Search() {
   const [hasSearched, setHasSearched] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
   const [submittedSex, setSubmittedSex] = useState("");
-  const { theme, setTheme } = useTheme();
 
   const performSearch = async (searchName: string, searchSex: string) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`
+        `/api/names?name=${searchName}&sex=${searchSex}`,
       );
       const result = await response.json();
       setData(result);
@@ -81,7 +79,9 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!name || !sex) return;
+    if (!name || !sex) {
+      return;
+    }
 
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
@@ -129,7 +129,7 @@ function Search() {
     const csvContent = [
       headers.join(","),
       ...data.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
       ),
     ].join("\n");
 
@@ -233,20 +233,13 @@ function Search() {
                   Popular Names
                 </Link>
                 {" | "}
-                <button
-                  onClick={() =>
-                    setTheme(
-                      theme === "dark"
-                        ? "light"
-                        : theme === "system"
-                        ? "light"
-                        : "dark"
-                    )
-                  }
-                  className="underline"
-                >
-                  Change Theme
-                </button>
+                <Link href="/compare" className="underline">
+                  Compare Names
+                </Link>
+                {" | "}
+                <Link href="/about" className="underline">
+                  About
+                </Link>
               </div>
             </form>
           </div>
