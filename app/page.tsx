@@ -28,7 +28,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
 import { Download } from "lucide-react";
-import { useTheme } from "next-themes";
 import Actuary from "@/components/actuary";
 import Numbers from "@/components/numbers";
 const inter = Inter({ subsets: ["latin"] });
@@ -59,7 +58,6 @@ function Search() {
   const [hasSearched, setHasSearched] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
   const [submittedSex, setSubmittedSex] = useState("");
-  const { theme, setTheme } = useTheme();
 
   const performSearch = async (searchName: string, searchSex: string) => {
     setIsLoading(true);
@@ -239,20 +237,9 @@ function Search() {
                   Compare Names
                 </Link>
                 {" | "}
-                <button
-                  onClick={() =>
-                    setTheme(
-                      theme === "dark"
-                        ? "light"
-                        : theme === "system"
-                          ? "light"
-                          : "dark",
-                    )
-                  }
-                  className="underline"
-                >
-                  Change Theme
-                </button>
+                <Link href="/about" className="underline">
+                  About
+                </Link>
               </div>
             </form>
           </div>
