@@ -1,20 +1,13 @@
+![image](https://github.com/user-attachments/assets/c873576d-5d4f-4b81-b525-3c97b93a783c)
 # ✍️ Nomen
+### A web viewer and parser for US citizen names.
+##### A web viewer and parser for every name listed on a social security card between 1880-2023.
 
-> [!NOTE]  
-> This does **not** include any social security numbers. The only data stored is the name, frequency, sex, year born
-> This **is** public data given by the Social Security Administration. No PII is stored
+[Nomen](https://nomen.sh) is a website that allows people to explore and visualize name data from the US Social Security Adminstration (SSA). You can search through names, compare them, see charts and use actuary data to see how many people with a given name are alive.
 
-### A web viewer and parser for every name listed on a social security card between 1880-2023.
+The dataset is sourced from the [US Social Security Administration's Baby Names from Social Security Card Applications Dataset](https://catalog.data.gov/dataset/baby-names-from-social-security-card-applications-national-data) and the [US Social Security Adminstration's Actuarial Tables Dataset](https://www.ssa.gov/oact/STATS/table4c6.html)
 
-_(Tabulated based on Social Security records as of March 15, 2025)_
-
-## About
-
-Nomen is a web application that allows users to explore and analyze name data from the US Social Security Administration. The application provides interactive visualizations and searchable data for names registered on social security cards from 1880 through 2023.
-
-## Dataset Information
-
-This data is sourced from the [US Social Security Administration's Baby Names from Social Security Card Applications - National Dataset](https://catalog.data.gov/dataset/baby-names-from-social-security-card-applications-national-data).
+---
 
 ### Important Notes About the Data:
 
@@ -26,28 +19,14 @@ This data is sourced from the [US Social Security Administration's Baby Names fr
 - Names are sorted by sex and then by occurrences in descending order
 - Ties in occurrences are resolved alphabetically
 
-## Features
-
-- Name Search Look up historical data for any name and gender combination
-- **Trend Visualization**: Interactive charts showing name popularity over time
-- **Popular Names**: Browse the most popular names by year or across all time
-- **Data Table**: View detailed frequency data for each name by year
-
-## Tech Stack
-
-Nomen is built with modern web technologies:
-
-- **Frontend**: [Next.js](https://nextjs.org/) ([React](https://react.dev) framework)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/) components
-- **Database**: MySQL database with [Drizzle ORM](https://orm.drizzle.team/)
-- **Animations**: [Motion (formerly Framer Motion)](https://motion.dev/) for smooth UI transitions
-- **API**: RESTful API endpoints built with Next.js API routes
-
 ## API
 
 For detailed API documentation, see the [API README](/app/api/README.md).
 
-## Data Schema
+## Producing Locally
+Nomen is made with [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), mySQL, [Drizzle ORM](https://orm.drizzle.team/) and [Motion (formerly Framer Motion)](https://motion.dev/)
+
+For detailed API documentation, see the [API README](/app/api/README.md).
 
 Main names table schema:
 
@@ -67,3 +46,8 @@ amount INT,
 year INT,
 state CHAR(2)
 ```
+
+> [!NOTE]  
+> This does **not** include any social security numbers. The only data stored is the name, frequency, sex, year born
+> This **is** public data given by the Social Security Administration. No PII is stored
+###### (Tabulated based on Social Security records as of March 23, 2025), any person who registered for social security between 1880 and 2023 are on the dataset.
