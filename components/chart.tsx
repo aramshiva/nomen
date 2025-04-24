@@ -31,9 +31,9 @@ interface NameData {
   year: number;
 }
 
-const getChartConfig = (name: string): ChartConfig => ({
+const getChartConfig = (): ChartConfig => ({
   amount: {
-    label: name,
+    label: "Amount",
     color: "hsl(var(--chart-1))",
   },
   amount1: {
@@ -204,7 +204,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
             </div>
           ) : (
             <ChartContainer
-              config={getChartConfig(name, name1)}
+              config={getChartConfig()}
               className="aspect-auto h-[250px] w-full"
             >
               <AreaChart data={combinedData}>
