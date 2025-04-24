@@ -30,10 +30,9 @@ export default function Page() {
             </p>
             <p>
               I{"'"}m{" "}
-              <Link href="https://github.com/aramshiva" className="underline">
+              <Link href="https://github.com/aramshiva">
                 Aram
-              </Link>
-              , a fourteen year old based in Seattle. Over the last couple
+              </Link>. Over the last couple
               months i{"'"}ve been working on Nomen.
             </p>
             <p>
