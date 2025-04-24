@@ -31,7 +31,6 @@ import { Download } from "lucide-react";
 import { useTheme } from "next-themes";
 import Actuary from "@/components/actuary";
 import Numbers from "@/components/numbers";
-import { toast } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 interface NameData {
@@ -83,7 +82,6 @@ function Search() {
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!name || !sex) {
-      toast("Enter a name and select a sex to search");
       return;
     }
 
