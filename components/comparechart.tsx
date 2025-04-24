@@ -74,7 +74,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
           const response = await fetch(url);
           if (!response.ok) {
             throw new Error(
-              `API request failed with status ${response.status}`,
+              `API request failed with status ${response.status}`
             );
           }
           return response.json();
@@ -246,20 +246,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                 />
                 <ChartTooltip
                   cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      indicator="dot"
-                      formatter={(value, dataKey, props) => {
-                        const year = props.payload.year;
-                        const displayName =
-                          dataKey === "amount1" ? name : name1;
-                        return [
-                          `${value}`,
-                          ` people named ${displayName} were born in ${year}`,
-                        ];
-                      }}
-                    />
-                  }
+                  content={<ChartTooltipContent indicator="dot" />}
                 />
 
                 <Area
@@ -270,19 +257,14 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                   stroke="var(--color-amount)"
                   connectNulls={true}
                 />
-
-                {name1 && (
-                  <Area
-                    name={name1}
-                    dataKey="amount2"
-                    type="monotone"
-                    fill="url(#fillAmount2)"
-                    stroke="var(--color-amount1)"
-                    connectNulls={true}
-                  />
-                )}
-
-                <ChartLegend content={<ChartLegendContent />} />
+                <Area
+                  name={name1}
+                  dataKey="amount2"
+                  type="monotone"
+                  fill="url(#fillAmount2)"
+                  stroke="var(--color-amount1)"
+                  connectNulls={true}
+                />
               </AreaChart>
             </ChartContainer>
           )}

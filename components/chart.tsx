@@ -13,8 +13,6 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -33,21 +31,28 @@ interface NameData {
   year: number;
 }
 
-const chartConfig = {
+const getChartConfig = (name: string, name1?: string): ChartConfig => ({
   amount: {
-    label: "Amount",
+    label: name,
     color: "hsl(var(--chart-1))",
   },
-} satisfies ChartConfig;
+  amount1: {
+    label: "Amount",
+    color: "hsl(var(--chart-2))",
+  },
+});
 
 interface ChartProps {
   name: string;
   sex?: string;
+  name1?: string;
+  sex1?: string;
 }
 
-export default function Chart({ name, sex }: ChartProps) {
+export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
   const [timeRange, setTimeRange] = React.useState("100y");
-  const [chartData, setChartData] = React.useState<NameData[]>([]);
+  const [chartData1, setChartData1] = React.useState<NameData[]>([]);
+  const [chartData2, setChartData2] = React.useState<NameData[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const currentYear = new Date().getFullYear();
@@ -57,19 +62,31 @@ export default function Chart({ name, sex }: ChartProps) {
       setIsLoading(true);
       setError(null);
       try {
-        let url = `/api/names?name=${encodeURIComponent(name)}`;
-        if (sex) {
-          url += `&sex=${encodeURIComponent(sex)}`;
+        const fetchNameData = async (name: string, sex?: string) => {
+          if (!name) return [];
+
+          let url = `/api/names?name=${encodeURIComponent(name)}`;
+          if (sex) {
+            url += `&sex=${encodeURIComponent(sex)}`;
+          }
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(
+              `API request failed with status ${response.status}`
+            );
+          }
+          return response.json();
+        };
+
+        const data1 = await fetchNameData(name, sex);
+        setChartData1(data1);
+
+        if (name1) {
+          const data2 = await fetchNameData(name1, sex1);
+          setChartData2(data2);
+        } else {
+          setChartData2([]);
         }
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        setChartData(data);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load data. Please try again later.");
@@ -79,11 +96,11 @@ export default function Chart({ name, sex }: ChartProps) {
     };
 
     fetchData();
-  }, [name, sex]);
+  }, [name, sex, name1, sex1]);
 
-  const filteredData = chartData.filter((item) => {
+  const filterDataByTimeRange = (data: NameData[]) => {
     if (timeRange === "all") {
-      return true;
+      return data;
     }
 
     let yearsToSubtract = 100;
@@ -95,17 +112,55 @@ export default function Chart({ name, sex }: ChartProps) {
       yearsToSubtract = 20;
     }
     const startYear = currentYear - yearsToSubtract;
-    return item.year >= startYear;
-  });
+    return data.filter((item) => item.year >= startYear);
+  };
+
+  const filteredData1 = filterDataByTimeRange(chartData1);
+  const filteredData2 = filterDataByTimeRange(chartData2);
+
+  const prepareChartData = () => {
+    const allYears = new Set<number>();
+    filteredData1.forEach((item) => allYears.add(item.year));
+    filteredData2.forEach((item) => allYears.add(item.year));
+
+    const yearMap: Record<
+      number,
+      { year: number; amount1?: number; amount2?: number }
+    > = {};
+
+    Array.from(allYears)
+      .sort()
+      .forEach((year) => {
+        yearMap[year] = { year };
+      });
+
+    filteredData1.forEach((item) => {
+      yearMap[item.year].amount1 = item.amount;
+    });
+
+    filteredData2.forEach((item) => {
+      yearMap[item.year].amount2 = item.amount;
+    });
+
+    return Object.values(yearMap).sort((a, b) => a.year - b.year);
+  };
+
+  const combinedData = prepareChartData();
 
   return (
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>
-            {name} {sex ? `(${sex})` : ""} - Historical Data
+            {name} {sex ? `(${sex})` : ""}
+            {name1 ? ` vs ${name1} ${sex1 ? `(${sex1})` : ""}` : ""} -
+            Historical Data
           </CardTitle>
-          <CardDescription>Showing name frequency over time</CardDescription>
+          <CardDescription>
+            {name1
+              ? "Comparing name frequencies over time"
+              : "Name frequency over time"}
+          </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
@@ -143,18 +198,18 @@ export default function Chart({ name, sex }: ChartProps) {
             <div className="flex h-[250px] items-center justify-center">
               <p className="text-destructive">{error}</p>
             </div>
-          ) : filteredData.length === 0 ? (
+          ) : filteredData1.length === 0 && filteredData2.length === 0 ? (
             <div className="flex h-[250px] items-center justify-center text-muted-foreground">
               <p>No data available for the selected time range.</p>
             </div>
           ) : (
             <ChartContainer
-              config={chartConfig}
+              config={getChartConfig(name, name1)}
               className="aspect-auto h-[250px] w-full"
             >
-              <AreaChart data={filteredData}>
+              <AreaChart data={combinedData}>
                 <defs>
-                  <linearGradient id="fillAmount" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="fillAmount1" x1="0" y1="0" x2="0" y2="1">
                     <stop
                       offset="5%"
                       stopColor="var(--color-amount)"
@@ -163,6 +218,18 @@ export default function Chart({ name, sex }: ChartProps) {
                     <stop
                       offset="95%"
                       stopColor="var(--color-amount)"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                  <linearGradient id="fillAmount2" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-amount1)"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-amount1)"
                       stopOpacity={0.1}
                     />
                   </linearGradient>
@@ -175,25 +242,32 @@ export default function Chart({ name, sex }: ChartProps) {
                   tickMargin={8}
                   minTickGap={32}
                 />
-                <ChartTooltip
-                  cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      indicator="dot"
-                      formatter={(value, name, props) => [
-                        `${value}`,
-                        ` people were born in ${props.payload.year}`,
-                      ]}
-                    />
-                  }
-                />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="line" />}
+            />
+
                 <Area
-                  dataKey="amount"
+                  name={name}
+                  dataKey="amount1"
                   type="monotone"
-                  fill="url(#fillAmount)"
+                  fill="url(#fillAmount1)"
                   stroke="var(--color-amount)"
+                  connectNulls={true}
                 />
-                <ChartLegend content={<ChartLegendContent />} />
+
+                {name1 && (
+                  <Area
+                    name={name1}
+                    dataKey="amount2"
+                    type="monotone"
+                    fill="url(#fillAmount2)"
+                    stroke="var(--color-amount1)"
+                    connectNulls={true}
+                  />
+                )}
+
+                {/* <ChartLegend content={<ChartLegendContent />} /> */}
               </AreaChart>
             </ChartContainer>
           )}
