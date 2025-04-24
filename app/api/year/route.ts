@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { names } from "@/lib/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const year = searchParams.get("year");
   const sex = searchParams.get("sex");
+  const page = parseInt(searchParams.get("page") || "1");
+  const pageSize = parseInt(searchParams.get("pageSize") || "100");
+  const offset = (page - 1) * pageSize;
 
   if (!year) {
     return NextResponse.json(
@@ -16,43 +19,30 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const conditions = [];
-
-    // Only add year condition if year is not 'all'
-    if (year !== "all") {
-      conditions.push(eq(names.year, parseInt(year)));
-    }
-
-    if (sex) {
-      conditions.push(eq(names.sex, sex));
-    }
-
-    const query = db
-      .select({
-        name: names.name,
-        year: names.year,
-        sex: names.sex,
-        amount: names.amount,
-      })
+    let query = db
+      .select()
       .from(names)
-      .orderBy(desc(names.amount))
-      .limit(500);
+      .where(eq(names.year, parseInt(year)));
 
-    // Only apply where clause if there are conditions
-    if (conditions.length > 0) {
-      query.where(and(...conditions));
+    if (sex && sex !== "all") {
+      query = query.where(and(eq(names.sex, sex)));
     }
 
-    const popularNames = await query;
+    const result = await query
+      .orderBy(desc(names.amount))
+      .limit(pageSize)
+      .offset(offset);
 
     return NextResponse.json({
       success: true,
-      data: popularNames,
+      data: result,
+      page,
+      pageSize,
     });
   } catch (error) {
     console.error("Database error:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch popular names" },
+      { success: false, message: "Failed to fetch names data" },
       { status: 500 },
     );
   }
