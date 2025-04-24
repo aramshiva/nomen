@@ -333,7 +333,7 @@ function Search() {
   return (
     <>
       <div className={inter.className + " min-h-screen flex flex-col"}>
-        <TopBar>
+        <TopBar title="COMPARE">
           <form
             onSubmit={handleSearch}
             className="flex-1 flex flex-col md:flex-row gap-4 items-start"

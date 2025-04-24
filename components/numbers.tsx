@@ -74,7 +74,7 @@ export default function Actuary({ sex, name }: { sex: string; name: string }) {
                 )}
               </p>
               <p className="text-muted-foreground text-sm pb-5">
-                people alive with this name
+                people with this name
               </p>
             </div>
           </TooltipTrigger>

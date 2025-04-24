@@ -164,7 +164,7 @@ export default function PopularNamesPage() {
 
   return (
     <div className={inter.className + " min-h-screen flex flex-col"}>
-      <TopBar title="Most Popular Names">
+      <TopBar title="popular">
         <div className="flex items-center gap-4">
           <div className="w-40">
             <Select value={year} onValueChange={setYear}>
