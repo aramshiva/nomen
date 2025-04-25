@@ -182,18 +182,19 @@ export default function Geo({
       d3.select(svgRef.current).selectAll("*").remove();
 
       const color = d3.scaleQuantize<string>().domain([0, 100]);
-      color.range([
-        "#4a6b85",
-        "#3d7bb0",
-        "#2b8fd6",
-        "#1ca3f2",
-        "#0db7ff",
-        "#0aa2e6",
-        "#088bcc",
-        "#0673b3",
-        "#045c99",
-        "#034580",
-      ]);
+      // color.range([
+      //   "#4a6b85",
+      //   "#3d7bb0",
+      //   "#2b8fd6",
+      //   "#1ca3f2",
+      //   "#0db7ff",
+      //   "#0aa2e6",
+      //   "#088bcc",
+      //   "#0673b3",
+      //   "#045c99",
+      //   "#034580",
+      // ]);
+      color.range(["ff7b00","ff8800","ff9500","ffa200","ffaa00","ffb700","ffc300","ffd000","ffdd00","ffea00"]);
       // color.range(["#56ebd3", "#33837f", "#85c2d4", "#155392", "#0494fb"]);
 
       const scaleFactor = numericHeight / 610;
