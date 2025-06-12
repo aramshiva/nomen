@@ -46,7 +46,7 @@ export default function PopularNamesPage() {
   const fetchYearOptions = async () => {
     try {
       const years = [];
-      for (let y = 2023; y >= 1880; y--) {
+      for (let y = 2024; y >= 1880; y--) {
         years.push(y.toString());
       }
       setYearOptions(["all", ...years]);
