@@ -4,9 +4,9 @@
 
 # Babies
 
-### A parser for every name listed on a social security card between 1880-2023.
+### A parser for every name listed on a social security card between 1880-2024.
 
-_(Tabulated based on Social Security records as of March 3, 2024)_
+_(Tabulated based on Social Security records as of May 5, 2025)_
 
 Your first question is probably why? to that I ask why not?
 
