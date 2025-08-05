@@ -122,8 +122,7 @@ def main():
     
     folder_path = os.getenv('FOLDER_PATH')  # path to the folder containing the files
     total_rows = 2117219  # you can calculate this automatically if you really wanted
-    # as of 2023, the total rows is 2,117,219. This is the total number of rows in all files combined.
-    
+    # as of 2024, the total rows is 2,149,123. This is the total number of rows in all files combined.    
     try:
         conn = create_database(db_config)
     except Exception as e:

@@ -336,7 +336,7 @@ ${data
             </motion.p>
             <p className="text-muted-foreground text-sm pb-5">
               A parser for every name listed on a social security card between
-              1880-2023, tabulated from the United States Social Security
+              1880-2024, tabulated from the United States Social Security
               Adminstration{"'"}s data.
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
