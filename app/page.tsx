@@ -24,13 +24,21 @@ import Chart from "@/components/chart";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/top-bar";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+// import { Checkbox } from "@/components/ui/checkbox";
+// import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
 import { Download } from "lucide-react";
 import Actuary from "@/components/actuary";
 import Numbers from "@/components/numbers";
 const inter = Inter({ subsets: ["latin"] });
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NameData {
   name: string;
@@ -47,12 +55,12 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-        ? "F"
-        : "");
-  const urlActuary = searchParams.get("actuary");
+      ? "F"
+      : "");
+  // const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
-  const [showActuary, setShowActuary] = useState(urlActuary === "true");
+  // const [showActuary, setShowActuary] = useState(urlActuary === "true");
   const [data, setData] = useState<NameData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -63,7 +71,7 @@ function Search() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`,
+        `/api/names?name=${searchName}&sex=${searchSex}`
       );
       const result = await response.json();
       setData(result);
@@ -86,7 +94,7 @@ function Search() {
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
     url.searchParams.set("sex", sex);
-    if (showActuary) url.searchParams.set("actuary", "true");
+    // if (showActuary) url.searchParams.set("actuary", "true");
     window.history.pushState({}, "", url);
 
     await performSearch(name, sex);
@@ -116,11 +124,11 @@ function Search() {
     if (urlName && urlSex && !hasSearched) {
       setName(urlName);
       setSex(urlSex);
-      setShowActuary(urlActuary === "true");
+      // setShowActuary(urlActuary === "true");
       performSearch(urlName, urlSex);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlName, urlSex, urlActuary]);
+  }, [urlName, urlSex]);
 
   const exportToCsv = () => {
     if (data.length === 0) return;
@@ -129,7 +137,7 @@ function Search() {
     const csvContent = [
       headers.join(","),
       ...data.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
       ),
     ].join("\n");
 
@@ -143,6 +151,174 @@ function Search() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const exportToJson = () => {
+    if (data.length === 0) return;
+
+    const jsonContent = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonContent], {
+      type: "application/json;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${submittedName}-${submittedSex}.json`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToXml = () => {
+    if (data.length === 0) return;
+
+    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<nameData>
+${data
+  .map(
+    (item) => `  <record>
+    <name>${item.name}</name>
+    <sex>${item.sex}</sex>
+    <amount>${item.amount}</amount>
+    <year>${item.year}</year>
+  </record>`
+  )
+  .join("\n")}
+</nameData>`;
+
+    const blob = new Blob([xmlContent], {
+      type: "application/xml;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${submittedName}-${submittedSex}.xml`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToPdf = () => {
+    if (data.length === 0) return;
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, Noto, "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif; 
+      margin: 20px; 
+      font-size: 14px;
+    }
+    h1 { color: #333; margin-bottom: 24px; }
+    
+    .table-container {
+      width: 100%;
+      caption-bottom: true;
+      font-size: 0.875rem;
+    }
+    
+    table { 
+      width: 100%;
+      border-collapse: collapse;
+      caption-side: bottom;
+    }
+    
+    thead {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+    }
+    
+    thead tr {
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    th {
+      height: 40px;
+      padding: 0 8px;
+      text-align: left;
+      vertical-align: middle;
+      font-weight: 500;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    th:last-child {
+      text-align: right;
+    }
+    
+    tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: background-color 0.15s ease;
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(248, 250, 252, 0.5);
+    }
+    
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+    
+    td {
+      padding: 8px;
+      vertical-align: middle;
+    }
+    
+    td:first-child {
+      font-weight: 500;
+    }
+    
+    td:last-child {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 100px;">Name</th>
+          <th>Sex</th>
+          <th>Amount</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data
+          .map(
+            (item) => `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.sex}</td>
+            <td>${item.amount}</td>
+            <td>${item.year}</td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  </div>
+  <p>powered by nomen.sh</p>
+</body>
+</html>`;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    }
   };
 
   if (!hasSearched) {
@@ -192,27 +368,6 @@ function Search() {
                       <SelectItem value="F">Female</SelectItem>
                     </SelectContent>
                   </Select>
-                </motion.div>
-              </motion.div>
-              <motion.div
-                className="flex flex-col space-y-2"
-                layoutId="search-map-checkbox-container"
-              >
-                <motion.div
-                  layoutId="search-map-checkbox"
-                  className="flex items-center"
-                >
-                  <Checkbox
-                    id="show-actuary"
-                    checked={showActuary}
-                    onClick={() => setShowActuary(!showActuary)}
-                  />
-                  <label htmlFor="show-actuary" className="ml-2 cursor-pointer">
-                    Show Actuary Data
-                  </label>
-                  <Badge variant="secondary" className="ml-2">
-                    Beta
-                  </Badge>
                 </motion.div>
               </motion.div>
               <motion.div layoutId="search-button">
@@ -302,31 +457,47 @@ function Search() {
           <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
             <Chart name={submittedName} sex={submittedSex} />
             <Heatmap sex={submittedSex} name={submittedName} />
-            {showActuary && (
-              <>
-                <div>
-                  <Actuary name={submittedName} sex={submittedSex} />
-                </div>
-                <div>
-                  <Numbers name={submittedName} sex={submittedSex} />
-                </div>
-              </>
-            )}
+            <>
+              <div>
+                <Actuary name={submittedName} sex={submittedSex} />
+              </div>
+              <div>
+                <Numbers name={submittedName} sex={submittedSex} />
+              </div>
+            </>
           </div>
         )}
         <div className="flex-1 overflow-auto p-4">
           {data.length > 0 ? (
             <div className="container mx-auto">
               <div className="flex justify-end mb-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exportToCsv}
-                  className="flex items-center gap-2"
-                >
-                  <Download size={16} />
-                  Export CSV
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    {" "}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <Download size={16} />
+                      Export
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={exportToCsv}>
+                      Download CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportToPdf}>
+                      Download PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportToJson}>
+                      Download JSON
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportToXml}>
+                      Download XML
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <Table>
                 <TableHeader className="sticky top-0 bg-background">
