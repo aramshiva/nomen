@@ -7,45 +7,40 @@ from dotenv import load_dotenv
 
 load_dotenv('.env.local')
 
-def create_db(db_config): # create db if it doesn't exist.
+def create_database(db_config):
     db_config['database'] = os.getenv('DATABASE_NAM')    
     print(f"Connecting to MySQL server at {db_config['host']}...")
     
     conn = mysql.connector.connect(**db_config)
     c = conn.cursor()
     
-    table_name = os.getenv('DB_TABLE_NAM', 'names')
-    c.execute(f'''
-        CREATE TABLE IF NOT EXISTS {table_name} (
-            name VARCHAR(255),
-            sex CHAR(1),
-            amount INT,
-            year INT
-        )
-    ''')
+    # # Create table if it doesn't exist already
+    # table_name = os.getenv('DB_TABLE_NAM', 'names')
+    # c.execute(f'''
+    #     CREATE TABLE IF NOT EXISTS {table_name} (
+    #         name VARCHAR(255),
+    #         sex CHAR(1),
+    #         amount INT,
+    #         year INT
+    #     )
+    # ''')
     conn.commit()
     return conn
 
-def process_files(folder_path, db_conn, total_rows, batch_size): 
-    # folder path is where your storing the SSA's data files
-    # db_conn is just the connection to db
-    # total_rows is the total number of entries in the db (so you can calculate progress if you have a small batch size)
-    # batch_size is how many rows you want to insert at once, 
-    # i recommend something high, or else it will take a long time.
-    # You can change this by using the `--batch-size` argument when running the program, default is 10000.
+def process_files(folder_path, db_conn, total_rows, batch_size):
     files = [f for f in os.listdir(folder_path) if f.endswith('.txt')]
     processed_rows = 0
     total_time = 0
     batch_count = 0
     
-    print(f"Processing files with batch size: {batch_size}") 
+    print(f"Processing files with batch size: {batch_size}")
     
     for file in files:
-        year = int(file[3:7])  # extract year from filename "yobYYYY.txt"
+        year = int(file[3:7])  # Extract year from filename "yobYYYY.txt"
         batch_data = []
         file_start_time = time.time()
         
-        with open(os.path.join(folder_path, file), 'r', encoding='utf-8') as f:
+        with open(os.path.join(folder_path, file), 'r') as f:
             for line in f:
                 name, sex, amount = line.strip().split(',')
                 batch_data.append((name, sex, int(amount), year))
@@ -75,13 +70,12 @@ def process_files(folder_path, db_conn, total_rows, batch_size):
     
     if batch_count > 0:
         avg_batch_time = total_time / batch_count
-        print("Performance Summary:")
+        print(f"\nPerformance Summary:")
         print(f"Total processing time: {timedelta(seconds=total_time)}")
         print(f"Average batch processing time: {timedelta(seconds=avg_batch_time)}")
         print(f"Rows per second: {total_rows / total_time:.2f}")
-        # just some stats ¯\_(ツ)_/¯
 
-def insert_batch(conn, batch_data): # this is the actual code that inserts the batch into the db.
+def insert_batch(conn, batch_data):
     c = conn.cursor()
     table_name = os.getenv('DB_TABLE_NAM', 'names')
     
@@ -93,7 +87,7 @@ def insert_batch(conn, batch_data): # this is the actual code that inserts the b
     c.executemany(query, batch_data)
     conn.commit()
 
-def print_progress(current, total, name, year, sex, batch_time=None): # progress tracking stuff
+def print_progress(current, total, name, year, sex, batch_time=None):
     percentage = (current / total) * 100
     if sex == "F": sex = "Female"
     elif sex == "M": sex = "Male"
@@ -105,14 +99,14 @@ def print_progress(current, total, name, year, sex, batch_time=None): # progress
     
     print(progress_msg)
 
-def parse_arguments(): # parse batch size arg
+def parse_arguments():
     parser = argparse.ArgumentParser(description='Import name data into MySQL database')
     parser.add_argument('--batch-size', type=int, default=100000,
                         help='Number of records to insert in a single batch (default: 10000)')
     return parser.parse_args()
 
 def main():
-    start_time = time.time() # stats stuff
+    start_time = time.time()
     
     args = parse_arguments()
     
@@ -127,17 +121,18 @@ def main():
     }
     
     folder_path = os.getenv('FOLDER_PATH')  # path to the folder containing the files
-    total_rows = 2149123  # you can calculate this automatically if you really wanted, im lazy and haven't yet LOL.
+    total_rows = 2117219  # you can calculate this automatically if you really wanted
+    # as of 2024, the total rows is 2,149,123. This is the total number of rows in all files combined.    
     try:
-        conn = create_db(db_config)
-    except mysql.connector.Error as e:
+        conn = create_database(db_config)
+    except Exception as e:
         print(f"Error creating database: {e}")
         print(f"Attempted to connect to: {db_config['host']}")
         return
     
     try:
-        process_files(folder_path, conn, total_rows, args.batch_size)
-    except (mysql.connector.Error, FileNotFoundError, IOError) as e:
+        process_files(folder_path, conn, total_rows, 1000000)
+    except Exception as e:
         print("Error processing files:", e)
     
     conn.close()
