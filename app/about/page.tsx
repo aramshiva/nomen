@@ -96,10 +96,6 @@ export default function Page() {
               <Link href="/popular" className="underline">
                 Popular Names
               </Link>
-              {" | "}
-              <Link href="/compare" className="underline">
-                Compare Names
-              </Link>
             </div>
           </div>
         </div>
