@@ -140,10 +140,57 @@ def main():
     except (mysql.connector.Error, FileNotFoundError, IOError) as e:
         print("Error processing files:", e)
     
-    conn.close()
-    
     total_time = time.time() - start_time
-    print(f"\nTotal script execution time: {timedelta(seconds=total_time)}")
-
+    print(f"\nTotal main db script execution time: {timedelta(seconds=total_time)}")
+    
+    print("Now creating uniquenames db...")
+    table_name = os.getenv('DB_TABLE_NAM', 'names')
+    create_query = """
+    CREATE TABLE `uniquenames` (
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+"""
+    query = f"INSERT INTO `uniquenames` (`name`) SELECT DISTINCT `name` FROM `{table_name}`;"
+    try:
+        cursor = conn.cursor()
+        cursor.execute(create_query)
+        cursor.execute(query)
+        conn.commit()
+        print("`uniquenames` table created successfully.")
+    except mysql.connector.Error as e:
+        print(f"Error creating `uniquenames` table: {e}")
+    finally:
+        cursor.close()
+    print("now creating `unique_names` table...")
+    table_name = os.getenv('DB_TABLE_NAM', 'names')
+    create_query = """
+    CREATE TABLE IF NOT EXISTS `unique_names` (
+        `name` varchar(255) DEFAULT NULL,
+        `sex` char(1) DEFAULT NULL,
+        `amount` int(11) DEFAULT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci
+    """
+    query = f"""
+    INSERT INTO `unique_names` (`name`, `sex`, `amount`)
+    SELECT `name`, `sex`, SUM(`amount`) as `amount`
+    FROM `{table_name}`
+    GROUP BY `name`, `sex`
+    """
+    try:
+        cursor = conn.cursor()
+        cursor.execute(create_query)
+        cursor.execute(query)
+        conn.commit()
+    except mysql.connector.Error as e:
+        print(f"Error creating `unique_names` table: {e}")
+    finally:
+        cursor.close()
+    print("`unique_names` table created successfully.")
+    print("Names database import completed successfully. Please run the actuary/main.py file to generate actuarial data for number components.")
+    print("Now closing connection...")
+    conn.close()
+    print("Connection closed.")
+    print("All done! :)")
 if __name__ == '__main__':
     main()
