@@ -32,6 +32,11 @@ import { Download, SearchIcon } from "lucide-react";
 import Actuary from "@/components/actuary";
 import Numbers from "@/components/numbers";
 import { useTheme } from "next-themes";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 const inter = Inter({ subsets: ["latin"] });
 import {
   DropdownMenu,
@@ -39,6 +44,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface NameData {
   name: string;
@@ -46,6 +52,8 @@ interface NameData {
   amount: number;
   year: number;
 }
+
+type SearchMode = "regular" | "compare" | "gender";
 
 function Search() {
   const searchParams = useSearchParams();
@@ -55,23 +63,25 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlName1 = searchParams.get("name1");
   const urlSex1 =
     searchParams.get("sex1")?.toUpperCase() ||
     (searchParams.get("sex1")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex1")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlSearchMode = searchParams.get("mode");
   // const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
   const [name1, setName1] = useState(urlName1 || "");
   const [sex1, setSex1] = useState(urlSex1 || "");
-  const [searchMode, setSearchMode] = useState(urlSearchMode || "regular");
+  const [searchMode, setSearchMode] = useState<SearchMode>(
+    (urlSearchMode as SearchMode) || "regular",
+  );
   // const [showActuary, setShowActuary] = useState(urlActuary === "true");
   const [data, setData] = useState<NameData[]>([]);
   const [data1, setData1] = useState<NameData[]>([]);
@@ -86,12 +96,12 @@ function Search() {
   const performSearch = async (
     searchName: string,
     searchSex: string,
-    isSecond = false
+    isSecond = false,
   ) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`
+        `/api/names?name=${searchName}&sex=${searchSex}`,
       );
       const result = await response.json();
 
@@ -117,7 +127,11 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!name || !sex) {
+    if (!name) {
+      return;
+    }
+
+    if (searchMode !== "gender" && !sex) {
       return;
     }
 
@@ -159,7 +173,7 @@ function Search() {
       if (currentName && currentSex) {
         setName(currentName);
         setSex(currentSex);
-        setSearchMode(currentMode || "regular");
+        setSearchMode((currentMode as SearchMode) || "regular");
         performSearch(currentName, currentSex);
 
         if (currentMode === "compare" && currentName1 && currentSex1) {
@@ -183,7 +197,7 @@ function Search() {
     if (urlName && urlSex && !hasSearched) {
       setName(urlName);
       setSex(urlSex);
-      setSearchMode(urlSearchMode || "regular");
+      setSearchMode((urlSearchMode as SearchMode) || "regular");
       // setShowActuary(urlActuary === "true");
       performSearch(urlName, urlSex);
 
@@ -213,7 +227,7 @@ function Search() {
     const csvContent = [
       headers.join(","),
       ...dataToExport.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
       ),
     ].join("\n");
 
@@ -267,7 +281,7 @@ ${dataToExport
     <sex>${item.sex}</sex>
     <amount>${item.amount}</amount>
     <year>${item.year}</year>
-  </record>`
+  </record>`,
   )
   .join("\n")}
 </nameData>`;
@@ -386,7 +400,7 @@ ${dataToExport
             <td>${item.amount}</td>
             <td>${item.year}</td>
           </tr>
-        `
+        `,
           )
           .join("")}
       </tbody>
@@ -422,15 +436,26 @@ ${dataToExport
               {searchMode === "compare" && (
                 <span className="text-lg">COMPARE</span>
               )}
+              {searchMode === "gender" && (
+                <span className="text-lg">GENDER</span>
+              )}
             </motion.p>
             <p className="text-muted-foreground text-sm pb-5">
               {searchMode === "compare"
                 ? "Compare trends between two names from 1880-2023, using data from the United States Social Security Administration."
-                : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
+                : searchMode === "gender"
+                  ? "Search for a name across both genders to see combined usage trends from 1880-2024, using data from the United States Social Security Administration."
+                  : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
               {searchMode === "regular" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  className={
+                    (searchMode as string) === "gender"
+                      ? "grid grid-cols-1 gap-4"
+                      : "grid grid-cols-1 md:grid-cols-2 gap-4"
+                  }
+                >
                   <motion.div
                     className="flex flex-col space-y-2"
                     layoutId="name-input-container"
@@ -447,23 +472,25 @@ ${dataToExport
                       />
                     </motion.div>
                   </motion.div>
-                  <motion.div
-                    className="flex flex-col space-y-2"
-                    layoutId="sex-select-container"
-                  >
-                    <p>Sex:</p>
-                    <motion.div layoutId="sex-select">
-                      <Select value={sex} onValueChange={setSex}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="M">Male</SelectItem>
-                          <SelectItem value="F">Female</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  {(searchMode as string) !== "gender" && (
+                    <motion.div
+                      className="flex flex-col space-y-2"
+                      layoutId="sex-select-container"
+                    >
+                      <p>Sex:</p>
+                      <motion.div layoutId="sex-select">
+                        <Select value={sex} onValueChange={setSex}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="M">Male</SelectItem>
+                            <SelectItem value="F">Female</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -540,15 +567,65 @@ ${dataToExport
                 </div>
               )}
               <motion.div className="" layoutId="search-mode-select-container">
-                <p>Search Mode:</p>
+                <div className="pb-1 flex items-center space-x-2">
+                  <p>Search Mode:</p>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Badge className="">?</Badge>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <p className="font-semibold text-sm">Search Modes</p>
+                          <p className="text-xs text-muted-foreground">
+                            Choose how you want to explore name data from
+                            1880-2024
+                          </p>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <p className="font-medium text-xs">Regular</p>
+                            <p className="text-xs text-muted-foreground">
+                              Search popularity trends for a single name by
+                              gender
+                            </p>
+                          </div>
+
+                          <div className="space-y-1">
+                            <p className="font-medium text-xs">Compare</p>
+                            <p className="text-xs text-muted-foreground">
+                              Compare popularity trends between two names
+                              side-by-side
+                            </p>
+                          </div>
+
+                          <div className="space-y-1">
+                            <p className="font-medium text-xs">Gender</p>
+                            <p className="text-xs text-muted-foreground">
+                              View combined trends across both male and female
+                              usage on one name.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
                 <motion.div layoutId="search-mode-select">
-                  <Select value={searchMode} onValueChange={setSearchMode}>
+                  <Select
+                    value={searchMode}
+                    onValueChange={(value) =>
+                      setSearchMode(value as SearchMode)
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select search mode" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="regular">Regular</SelectItem>
                       <SelectItem value="compare">Compare</SelectItem>
+                      <SelectItem value="gender">Gender</SelectItem>
                     </SelectContent>
                   </Select>
                 </motion.div>
@@ -565,8 +642,10 @@ ${dataToExport
                     {isLoading
                       ? "Searching..."
                       : searchMode === "compare"
-                      ? "Compare"
-                      : "Search"}
+                        ? "Compare"
+                        : searchMode === "gender"
+                          ? "Search Gender"
+                          : "Search"}
                   </motion.span>
                 </Button>
               </motion.div>
@@ -585,8 +664,8 @@ ${dataToExport
                       theme === "dark"
                         ? "light"
                         : theme === "system"
-                        ? "light"
-                        : "dark"
+                          ? "light"
+                          : "dark",
                     )
                   }
                   className="underline"
@@ -604,7 +683,15 @@ ${dataToExport
   return (
     <>
       <div className={inter.className + " min-h-screen flex flex-col"}>
-        <TopBar title={searchMode === "compare" ? "COMPARE" : ""}>
+        <TopBar
+          title={
+            searchMode === "compare"
+              ? "COMPARE"
+              : searchMode === "gender"
+                ? "GENDER"
+                : ""
+          }
+        >
           <form
             onSubmit={handleSearch}
             className="flex-1 flex flex-col md:flex-row gap-4 items-center"
@@ -636,6 +723,20 @@ ${dataToExport
                         <SelectItem value="F">Female</SelectItem>
                       </SelectContent>
                     </Select>
+                  </motion.div>
+                </motion.div>
+              </>
+            ) : searchMode === "gender" ? (
+              <>
+                <motion.div className="w-full" layoutId="name-input-container">
+                  <motion.div layoutId="name-input">
+                    <Input
+                      type="text"
+                      placeholder="Enter a name"
+                      aria-label="Name search"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
                   </motion.div>
                 </motion.div>
               </>
@@ -707,8 +808,10 @@ ${dataToExport
                   {isLoading
                     ? "Searching..."
                     : searchMode === "compare"
-                    ? "Compare"
-                    : "Search"}
+                      ? "Compare"
+                      : searchMode === "gender"
+                        ? "Search Gender"
+                        : "Search"}
                 </motion.span>
               </Button>
             </motion.div>

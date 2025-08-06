@@ -20,7 +20,12 @@ import {
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { TopBar } from "@/components/top-bar";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,12 +58,12 @@ export default function ActuaryPage() {
     limit: 10,
     totalPages: 0,
   });
-  
+
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > pagination.totalPages) return;
     setPagination({ ...pagination, page: newPage });
   };
-  
+
   const handleLimitChange = (newLimit: string) => {
     setPagination({ ...pagination, limit: parseInt(newLimit), page: 1 });
   };
@@ -92,14 +97,16 @@ export default function ActuaryPage() {
 
   const formatSurvivalProbability = (survivors: Survivor[] | undefined) => {
     if (!survivors || !Array.isArray(survivors)) return "N/A";
-    
-    const age80 = survivors.find(s => s.age === 80);
+
+    const age80 = survivors.find((s) => s.age === 80);
     if (age80) {
       return `${(age80.probability * 100).toFixed(2)}%`;
     }
-    
+
     const lastAge = survivors[survivors.length - 1];
-    return lastAge ? `${(lastAge.probability * 100).toFixed(2)}% at age ${lastAge.age}` : "N/A";
+    return lastAge
+      ? `${(lastAge.probability * 100).toFixed(2)}% at age ${lastAge.age}`
+      : "N/A";
   };
 
   return (
@@ -122,7 +129,10 @@ export default function ActuaryPage() {
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center space-x-2">
                 <span className="text-sm">Rows per page:</span>
-                <Select value={pagination.limit.toString()} onValueChange={handleLimitChange}>
+                <Select
+                  value={pagination.limit.toString()}
+                  onValueChange={handleLimitChange}
+                >
                   <SelectTrigger className="w-20">
                     <SelectValue placeholder="10" />
                   </SelectTrigger>
@@ -135,10 +145,12 @@ export default function ActuaryPage() {
                 </Select>
               </div>
               <div className="text-sm text-muted-foreground">
-                Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
+                Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+                of {pagination.total} entries
               </div>
             </div>
-            
+
             <Table>
               <TableHeader className="sticky top-0 bg-background">
                 <TableRow>
@@ -162,9 +174,7 @@ export default function ActuaryPage() {
                     <TableCell>
                       {item.sex === "M" ? "Male" : "Female"}
                     </TableCell>
-                    <TableCell>
-                      {item.amount.toLocaleString()}
-                    </TableCell>
+                    <TableCell>{item.amount.toLocaleString()}</TableCell>
                     <TableCell className="text-right">
                       {formatSurvivalProbability(item.estimatedSurvivors)}
                     </TableCell>
@@ -172,39 +182,39 @@ export default function ActuaryPage() {
                 ))}
               </TableBody>
             </Table>
-            
+
             <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-muted-foreground">
                 Page {pagination.page} of {pagination.totalPages}
               </div>
               <div className="flex space-x-1">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() => handlePageChange(1)}
                   disabled={pagination.page === 1}
                 >
                   <ChevronsLeft className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.totalPages}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() => handlePageChange(pagination.totalPages)}
                   disabled={pagination.page === pagination.totalPages}
                 >

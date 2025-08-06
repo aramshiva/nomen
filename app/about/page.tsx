@@ -20,7 +20,10 @@ export default function Page() {
       >
         <div className="flex flex-col items-center justify-center min-h-screen p-6 text-muted-foreground text-md">
           <div className="w-[30rem] max-w-full">
-            <motion.a href="/" className="text-black dark:text-white font-bold text-2xl font-gosha lowercase pb-1">
+            <motion.a
+              href="/"
+              className="text-black dark:text-white font-bold text-2xl font-gosha lowercase pb-1"
+            >
               Nomen
             </motion.a>
             <p className="text-sm pb-5">
@@ -29,11 +32,8 @@ export default function Page() {
               Adminstration{"'"}s data.
             </p>
             <p>
-              I{"'"}m{" "}
-              <Link href="https://github.com/aramshiva">
-                Aram
-              </Link>. Over the last couple
-              months i{"'"}ve been working on Nomen.
+              I{"'"}m <Link href="https://github.com/aramshiva">Aram</Link>.
+              Over the last couple months i{"'"}ve been working on Nomen.
             </p>
             <p>
               Nomen is open source and avaliable on my{" "}
@@ -79,8 +79,8 @@ export default function Page() {
                     theme === "dark"
                       ? "light"
                       : theme === "system"
-                      ? "light"
-                      : "dark"
+                        ? "light"
+                        : "dark",
                   )
                 }
                 className="underline"
