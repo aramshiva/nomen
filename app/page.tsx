@@ -63,16 +63,16 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-        ? "F"
-        : "");
+      ? "F"
+      : "");
   const urlName1 = searchParams.get("name1");
   const urlSex1 =
     searchParams.get("sex1")?.toUpperCase() ||
     (searchParams.get("sex1")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex1")?.toLowerCase() === "female"
-        ? "F"
-        : "");
+      ? "F"
+      : "");
   const urlSearchMode = searchParams.get("mode");
   // const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
@@ -80,7 +80,7 @@ function Search() {
   const [name1, setName1] = useState(urlName1 || "");
   const [sex1, setSex1] = useState(urlSex1 || "");
   const [searchMode, setSearchMode] = useState<SearchMode>(
-    (urlSearchMode as SearchMode) || "regular",
+    (urlSearchMode as SearchMode) || "regular"
   );
   // const [showActuary, setShowActuary] = useState(urlActuary === "true");
   const [data, setData] = useState<NameData[]>([]);
@@ -96,12 +96,12 @@ function Search() {
   const performSearch = async (
     searchName: string,
     searchSex: string,
-    isSecond = false,
+    isSecond = false
   ) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`,
+        `/api/names?name=${searchName}&sex=${searchSex}`
       );
       const result = await response.json();
 
@@ -227,7 +227,7 @@ function Search() {
     const csvContent = [
       headers.join(","),
       ...dataToExport.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
       ),
     ].join("\n");
 
@@ -281,7 +281,7 @@ ${dataToExport
     <sex>${item.sex}</sex>
     <amount>${item.amount}</amount>
     <year>${item.year}</year>
-  </record>`,
+  </record>`
   )
   .join("\n")}
 </nameData>`;
@@ -400,7 +400,7 @@ ${dataToExport
             <td>${item.amount}</td>
             <td>${item.year}</td>
           </tr>
-        `,
+        `
           )
           .join("")}
       </tbody>
@@ -444,8 +444,8 @@ ${dataToExport
               {searchMode === "compare"
                 ? "Compare trends between two names from 1880-2023, using data from the United States Social Security Administration."
                 : searchMode === "gender"
-                  ? "Search for a name across both genders to see combined usage trends from 1880-2024, using data from the United States Social Security Administration."
-                  : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
+                ? "Search for a name across both genders to see combined usage trends from 1880-2024, using data from the United States Social Security Administration."
+                : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
               {searchMode === "regular" ? (
@@ -642,10 +642,10 @@ ${dataToExport
                     {isLoading
                       ? "Searching..."
                       : searchMode === "compare"
-                        ? "Compare"
-                        : searchMode === "gender"
-                          ? "Search Gender"
-                          : "Search"}
+                      ? "Compare"
+                      : searchMode === "gender"
+                      ? "Search Gender"
+                      : "Search"}
                   </motion.span>
                 </Button>
               </motion.div>
@@ -664,8 +664,8 @@ ${dataToExport
                       theme === "dark"
                         ? "light"
                         : theme === "system"
-                          ? "light"
-                          : "dark",
+                        ? "light"
+                        : "dark"
                     )
                   }
                   className="underline"
@@ -688,8 +688,8 @@ ${dataToExport
             searchMode === "compare"
               ? "COMPARE"
               : searchMode === "gender"
-                ? "GENDER"
-                : ""
+              ? "GENDER"
+              : ""
           }
         >
           <form
@@ -808,10 +808,10 @@ ${dataToExport
                   {isLoading
                     ? "Searching..."
                     : searchMode === "compare"
-                      ? "Compare"
-                      : searchMode === "gender"
-                        ? "Search Gender"
-                        : "Search"}
+                    ? "Compare"
+                    : searchMode === "gender"
+                    ? "Search Gender"
+                    : "Search"}
                 </motion.span>
               </Button>
             </motion.div>
