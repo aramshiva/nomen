@@ -13,12 +13,9 @@ Nomen runs on [Next.js](https://nextjs.org/) and [Tailwind CSS](https://tailwind
 #### Running locally
 
 ##### Creating a database
-To run nomen locally, first you need to spin up a database with name data populated inside. You'll first want to spin up a mySQL database. Then you will want to go to the `sql` folder and populate the `.env` file with your mySQL creds (example creds can be found on the `.env.example` file).
+To run nomen locally, first you need to spin up a database with name data populated inside. You'll first want to spin up a mySQL database. Then you will want to go to the `db` folder and populate the `.env` file with your mySQL creds (example creds can be found on the `.env.example` file).
 
-> [!CAUTION]
-> The `main.py` file is very janky, one day I will remake it but there will be bugs and stuff you have to manually change. You've been warned. If you have troubles, email me at me@aram.sh, and I may be able to help.
-
-Once you've done that, run the `main.py` file, this will go through the data and populate the database.
+Once you've done that, run the `main.py` file, this will go through the data and populate the database's names tables.
 
 > [!NOTE]  
 >
@@ -30,6 +27,10 @@ Once you've done that, run the `main.py` file, this will go through the data and
 >amount INT,
 >year INT
 >```
+
+Once that's done, it will create the uniquenames and unique_names (confusing names I know lol) databases (this is done automatically, just leave the script running)!
+
+Then go to the actuary folder in there and run the `main.py` folder in there, this will spin up the actuary tables for death/age prediction.
 
 ##### Spinning up the site locally
 Once you have the database working locally, it's really easy to setup up the website. First install [`bun`](https://bun.com/), and then run `bun i` (this will install the packages onto the repository on your computer). Now just run `bun dev` and then go to `localhost:3000`, there you will see nomen running locally!
