@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import Chart from "@/components/chart";
 import CompareChart from "@/components/comparechart";
@@ -53,7 +53,15 @@ interface NameData {
   year: number;
 }
 
-type SearchMode = "regular" | "compare" | "gender";
+interface PopularNameData {
+  name: string;
+  sex: string;
+  amount: number;
+  rank: number;
+  year?: number;
+}
+
+type SearchMode = "regular" | "compare" | "gender" | "popular";
 
 function Search() {
   const searchParams = useSearchParams();
@@ -85,6 +93,17 @@ function Search() {
   // const [showActuary, setShowActuary] = useState(urlActuary === "true");
   const [data, setData] = useState<NameData[]>([]);
   const [data1, setData1] = useState<NameData[]>([]);
+  
+  const [popularData, setPopularData] = useState<PopularNameData[]>([]);
+  const [popularYear, setPopularYear] = useState<string>("all");
+  const [popularSex, setPopularSex] = useState<string>("all");
+  const [popularYearOptions, setPopularYearOptions] = useState<string[]>([]);
+  const [popularPage, setPopularPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastItemRef = useRef<HTMLTableRowElement | null>(null);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
@@ -92,6 +111,89 @@ function Search() {
   const [submittedName1, setSubmittedName1] = useState("");
   const [submittedSex1, setSubmittedSex1] = useState("");
   const { theme, setTheme } = useTheme();
+
+  const fetchPopularYearOptions = useCallback(async () => {
+    try {
+      const years = [];
+      for (let y = 2024; y >= 1880; y--) {
+        years.push(y.toString());
+      }
+      setPopularYearOptions(["all", ...years]);
+    } catch (error) {
+      console.error("Error fetching year options:", error);
+    }
+  }, []);
+
+  const fetchPopularNames = useCallback(async (pageNum = 1, shouldAppend = false) => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const pageSize = 100;
+      let apiUrl;
+      if (popularYear === "all") {
+        apiUrl = `/api/popular/all?page=${pageNum}&pageSize=${pageSize}`;
+        if (popularSex !== "all") {
+          apiUrl += `&sex=${popularSex}`;
+        }
+      } else {
+        apiUrl = `/api/year?year=${popularYear}&page=${pageNum}&pageSize=${pageSize}`;
+        if (popularSex !== "all") {
+          apiUrl += `&sex=${popularSex}`;
+        }
+      }
+
+      const response = await fetch(apiUrl);
+      const result = await response.json();
+
+      if (result.success && Array.isArray(result.data)) {
+        if (result.data.length === 0) {
+          setHasMore(false);
+          return;
+        }
+
+        const sortedData = result.data.sort(
+          (a: PopularNameData, b: PopularNameData) => b.amount - a.amount,
+        );
+
+        const startRank = (pageNum - 1) * pageSize + 1;
+        const rankedData: PopularNameData[] = sortedData.map(
+          (item: PopularNameData, index: number) => ({
+            ...item,
+            rank: startRank + index,
+          }),
+        );
+
+        if (shouldAppend) {
+          setPopularData((prevData) => [...prevData, ...rankedData]);
+        } else {
+          setPopularData(rankedData);
+        }
+      } else {
+        if (!shouldAppend) {
+          setPopularData([]);
+        }
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Error fetching popular names:", error);
+      if (!shouldAppend) {
+        setPopularData([]);
+      }
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+      setInitialLoad(false);
+    }
+  }, [isLoading, popularYear, popularSex]);
+
+  const loadMoreItems = useCallback(() => {
+    if (!isLoading && hasMore) {
+      const nextPage = popularPage + 1;
+      setPopularPage(nextPage);
+      fetchPopularNames(nextPage, true);
+    }
+  }, [isLoading, hasMore, popularPage, fetchPopularNames]);
 
   const performSearch = async (
     searchName: string,
@@ -129,6 +231,13 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    
+    if (searchMode === "popular") {
+      await fetchPopularNames();
+      setHasSearched(true);
+      return;
+    }
+    
     if (!name) {
       return;
     }
@@ -152,12 +261,10 @@ function Search() {
         url.searchParams.set("sex1", sex1);
       }
     } else if (searchMode === "gender") {
-      // For gender mode, we don't set sex in URL since we search both
       url.searchParams.delete("sex");
       url.searchParams.delete("name1");
       url.searchParams.delete("sex1");
     } else {
-      // Regular mode
       url.searchParams.set("sex", sex);
       url.searchParams.delete("name1");
       url.searchParams.delete("sex1");
@@ -166,7 +273,6 @@ function Search() {
     window.history.pushState({}, "", url);
 
     if (searchMode === "gender") {
-      // For gender mode, search the same name as both male and female
       await performSearch(name, "M");
       await performSearch(name, "F", true);
     } else if (searchMode === "compare" && name1 && sex1) {
@@ -176,6 +282,47 @@ function Search() {
       await performSearch(name, sex);
     }
   };
+
+  useEffect(() => {
+    if (searchMode === "popular") {
+      fetchPopularYearOptions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchMode]);
+
+  useEffect(() => {
+    if (searchMode === "popular") {
+      setPopularPage(1);
+      setHasMore(true);
+      fetchPopularNames(1, false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [popularYear, popularSex]);
+
+  useEffect(() => {
+    if (searchMode === "popular") {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting && !initialLoad) {
+            loadMoreItems();
+          }
+        },
+        { threshold: 0.5 },
+      );
+
+      observerRef.current = observer;
+
+      if (lastItemRef.current) {
+        observer.observe(lastItemRef.current);
+      }
+
+      return () => observer.disconnect();
+    }
+  }, [loadMoreItems, initialLoad, searchMode]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -455,16 +602,52 @@ ${dataToExport
               {searchMode === "gender" && (
                 <span className="text-lg">GENDER</span>
               )}
+              {searchMode === "popular" && (
+                <span className="text-lg">POPULAR</span>
+              )}
             </motion.p>
             <p className="text-muted-foreground text-sm pb-5">
               {searchMode === "compare"
                 ? "Compare trends between two names from 1880-2023, using data from the United States Social Security Administration."
                 : searchMode === "gender"
                 ? "Search for a name across both genders to see combined usage trends from 1880-2024, using data from the United States Social Security Administration."
+                : searchMode === "popular"
+                ? "Browse the most popular names by year and gender from 1880-2024, using data from the United States Social Security Administration."
                 : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
-              {searchMode === "regular" || searchMode === "gender" ? (
+              {searchMode === "popular" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <motion.div className="flex flex-col space-y-2">
+                    <p>Year:</p>
+                    <Select value={popularYear} onValueChange={setPopularYear}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {popularYearOptions.map((y) => (
+                          <SelectItem key={y} value={y}>
+                            {y === "all" ? "All Time" : y}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                  <motion.div className="flex flex-col space-y-2">
+                    <p>Sex:</p>
+                    <Select value={popularSex} onValueChange={setPopularSex}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sex" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="M">Male</SelectItem>
+                        <SelectItem value="F">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                </div>
+              ) : searchMode === "regular" || searchMode === "gender" ? (
                 <div
                   className={
                     (searchMode as string) === "gender"
@@ -637,7 +820,7 @@ ${dataToExport
 
                           <div>
                             <p className="font-medium text-xs">
-                              Popular (coming soon)
+                              Popular
                             </p>
                             <p className="text-xs text-muted-foreground">
                               View popularity trends for the most popular names.
@@ -652,10 +835,6 @@ ${dataToExport
                   <Select
                     value={searchMode}
                     onValueChange={(value) => {
-                      if (value === "popular") {
-                        window.open("/popular", "_blank");
-                        return;
-                      }
                       setSearchMode(value as SearchMode);
                     }}
                   >
@@ -684,9 +863,11 @@ ${dataToExport
                     transition={{ duration: 0.6 }}
                   >
                     {isLoading
-                      ? "Searching..."
+                      ? searchMode === "popular" ? "Loading..." : "Searching..."
                       : searchMode === "compare"
                       ? "Compare"
+                      : searchMode === "popular"
+                      ? "View Popular Names"
                       : "Search"}
                   </motion.span>
                 </Button>
@@ -731,6 +912,8 @@ ${dataToExport
               ? "COMPARE"
               : searchMode === "gender"
               ? "GENDER"
+              : searchMode === "popular"
+              ? "POPULAR"
               : ""
           }
         >
@@ -781,6 +964,35 @@ ${dataToExport
                     />
                   </motion.div>
                 </motion.div>
+              </>
+            ) : searchMode === "popular" ? (
+              <>
+                <div className="w-full md:w-40">
+                  <Select value={popularYear} onValueChange={setPopularYear}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {popularYearOptions.map((y) => (
+                        <SelectItem key={y} value={y}>
+                          {y === "all" ? "All Time" : y}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="w-full md:w-40">
+                  <Select value={popularSex} onValueChange={setPopularSex}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select sex" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </>
             ) : (
               <>
@@ -848,16 +1060,18 @@ ${dataToExport
                   transition={{ duration: 0.6 }}
                 >
                   {isLoading
-                    ? "Searching..."
+                    ? searchMode === "popular" ? "Loading..." : "Searching..."
                     : searchMode === "compare"
                     ? "Compare"
+                    : searchMode === "popular"
+                    ? "View Popular Names"
                     : "Search"}
                 </motion.span>
               </Button>
             </motion.div>
           </form>
         </TopBar>
-        {data.length > 0 && (
+        {(data.length > 0 || (searchMode === "popular" && popularData.length > 0)) && searchMode !== "popular" && (
           <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 gap-3 md:gap-2">
             {searchMode === "compare" || searchMode === "gender" ? (
               <CompareChart
@@ -880,6 +1094,72 @@ ${dataToExport
             )}
           </div>
         )}
+        
+        {searchMode === "popular" && (
+          <div className="flex-1 overflow-auto p-4">
+            {initialLoad && isLoading ? (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-muted-foreground">Loading popular names...</p>
+              </div>
+            ) : popularData.length > 0 ? (
+              <div className="container mx-auto">
+                <h2 className="text-xl font-semibold mb-4">
+                  {popularYear === "all" ? "All Time" : popularYear}{" "}
+                  {popularSex === "M" ? "Male" : popularSex === "F" ? "Female" : ""} Names
+                </h2>
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background">
+                    <TableRow>
+                      <TableHead className="w-[80px]">Rank</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Sex</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {popularData.map((item, index) => (
+                      <TableRow
+                        key={index}
+                        ref={index === popularData.length - 10 ? lastItemRef : null}
+                      >
+                        <TableCell>{item.rank}</TableCell>
+                        <TableCell className="font-medium">
+                          <Link
+                            href={`/?name=${item.name}&sex=${item.sex}`}
+                            className="hover:underline text-primary"
+                          >
+                            {item.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          {item.sex === "M" ? "Male" : "Female"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.amount.toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {isLoading && !initialLoad && (
+                  <div className="py-4 text-center">
+                    <p className="text-muted-foreground">Loading more names...</p>
+                  </div>
+                )}
+                {!hasMore && (
+                  <div className="py-4 text-center">
+                    <p className="text-muted-foreground">No more names to load</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-muted-foreground">No popular names found</p>
+              </div>
+            )}
+          </div>
+        )}
+        
         {(searchMode === "compare" || searchMode === "gender") && (
           <div className="md:hidden p-4 text-center">
             <div className="bg-secondary/30 rounded-lg p-4">
@@ -897,6 +1177,8 @@ ${dataToExport
           className={
             searchMode === "compare" || searchMode === "gender"
               ? "hidden md:flex flex-row space-x-9 p-9"
+              : searchMode === "popular"
+              ? "hidden"
               : "flex-1 overflow-auto p-4"
           }
         >
