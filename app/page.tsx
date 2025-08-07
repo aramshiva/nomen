@@ -95,24 +95,26 @@ function Search() {
 
   const performSearch = async (
     searchName: string,
-    searchSex: string,
+    searchSex?: string,
     isSecond = false
   ) => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`
-      );
+      const url = searchSex
+        ? `/api/names?name=${searchName}&sex=${searchSex}`
+        : `/api/names?name=${searchName}`;
+
+      const response = await fetch(url);
       const result = await response.json();
 
       if (isSecond) {
         setData1(result);
         setSubmittedName1(searchName);
-        setSubmittedSex1(searchSex);
+        setSubmittedSex1(searchSex || "");
       } else {
         setData(result);
         setSubmittedName(searchName);
-        setSubmittedSex(searchSex);
+        setSubmittedSex(searchSex || "");
       }
 
       if (!hasSearched) {
@@ -141,23 +143,37 @@ function Search() {
 
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
-    url.searchParams.set("sex", sex);
     url.searchParams.set("mode", searchMode);
 
-    if (searchMode === "compare" && name1 && sex1) {
-      url.searchParams.set("name1", name1);
-      url.searchParams.set("sex1", sex1);
+    if (searchMode === "compare") {
+      url.searchParams.set("sex", sex);
+      if (name1 && sex1) {
+        url.searchParams.set("name1", name1);
+        url.searchParams.set("sex1", sex1);
+      }
+    } else if (searchMode === "gender") {
+      // For gender mode, we don't set sex in URL since we search both
+      url.searchParams.delete("sex");
+      url.searchParams.delete("name1");
+      url.searchParams.delete("sex1");
     } else {
+      // Regular mode
+      url.searchParams.set("sex", sex);
       url.searchParams.delete("name1");
       url.searchParams.delete("sex1");
     }
 
-    // if (showActuary) url.searchParams.set("actuary", "true");
     window.history.pushState({}, "", url);
 
-    await performSearch(name, sex);
-    if (searchMode === "compare" && name1 && sex1) {
+    if (searchMode === "gender") {
+      // For gender mode, search the same name as both male and female
+      await performSearch(name, "M");
+      await performSearch(name, "F", true);
+    } else if (searchMode === "compare" && name1 && sex1) {
+      await performSearch(name, sex);
       await performSearch(name1, sex1, true);
+    } else {
+      await performSearch(name, sex);
     }
   };
 
@@ -448,7 +464,7 @@ ${dataToExport
                 : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
-              {searchMode === "regular" ? (
+              {searchMode === "regular" || searchMode === "gender" ? (
                 <div
                   className={
                     (searchMode as string) === "gender"
@@ -571,20 +587,20 @@ ${dataToExport
                   <p>Search Mode:</p>
                   <HoverCard>
                     <HoverCardTrigger asChild>
-                      <Badge className="">?</Badge>
+                      <Badge variant="outline">?</Badge>
                     </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="space-y-3">
-                        <div className="space-y-2">
-                          <p className="font-semibold text-sm">Search Modes</p>
+                    <HoverCardContent className="w-[35rem]">
+                      <div className="space-y-2">
+                        <div>
+                          <p className="font-semibold text-xs">Search Modes</p>
                           <p className="text-xs text-muted-foreground">
                             Choose how you want to explore name data from
                             1880-2024
                           </p>
                         </div>
 
-                        <div className="space-y-3">
-                          <div className="space-y-1">
+                        <div className="space-y-2">
+                          <div>
                             <p className="font-medium text-xs">Regular</p>
                             <p className="text-xs text-muted-foreground">
                               Search popularity trends for a single name by
@@ -592,7 +608,7 @@ ${dataToExport
                             </p>
                           </div>
 
-                          <div className="space-y-1">
+                          <div>
                             <p className="font-medium text-xs">Compare</p>
                             <p className="text-xs text-muted-foreground">
                               Compare popularity trends between two names
@@ -600,11 +616,31 @@ ${dataToExport
                             </p>
                           </div>
 
-                          <div className="space-y-1">
+                          <div>
                             <p className="font-medium text-xs">Gender</p>
                             <p className="text-xs text-muted-foreground">
                               View combined trends across both male and female
                               usage on one name.
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="font-medium text-xs">
+                              Actuary (coming soon)
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              View actuarial data for the name, including
+                              estimated lifespan and other statistics. (this
+                              data is shown in regular as well!)
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="font-medium text-xs">
+                              Popular (coming soon)
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              View popularity trends for the most popular names.
                             </p>
                           </div>
                         </div>
@@ -615,9 +651,13 @@ ${dataToExport
                 <motion.div layoutId="search-mode-select">
                   <Select
                     value={searchMode}
-                    onValueChange={(value) =>
-                      setSearchMode(value as SearchMode)
-                    }
+                    onValueChange={(value) => {
+                      if (value === "popular") {
+                        window.open("/popular", "_blank");
+                        return;
+                      }
+                      setSearchMode(value as SearchMode);
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select search mode" />
@@ -626,6 +666,10 @@ ${dataToExport
                       <SelectItem value="regular">Regular</SelectItem>
                       <SelectItem value="compare">Compare</SelectItem>
                       <SelectItem value="gender">Gender</SelectItem>
+                      <SelectItem value="actuary" disabled>
+                        Actuary
+                      </SelectItem>
+                      <SelectItem value="popular">Popular</SelectItem>
                     </SelectContent>
                   </Select>
                 </motion.div>
@@ -643,8 +687,6 @@ ${dataToExport
                       ? "Searching..."
                       : searchMode === "compare"
                       ? "Compare"
-                      : searchMode === "gender"
-                      ? "Search Gender"
                       : "Search"}
                   </motion.span>
                 </Button>
@@ -809,8 +851,6 @@ ${dataToExport
                     ? "Searching..."
                     : searchMode === "compare"
                     ? "Compare"
-                    : searchMode === "gender"
-                    ? "Search Gender"
                     : "Search"}
                 </motion.span>
               </Button>
@@ -819,12 +859,12 @@ ${dataToExport
         </TopBar>
         {data.length > 0 && (
           <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 gap-3 md:gap-2">
-            {searchMode === "compare" ? (
+            {searchMode === "compare" || searchMode === "gender" ? (
               <CompareChart
                 name={submittedName}
                 sex={submittedSex}
-                name1={submittedName1}
-                sex1={submittedSex1}
+                name1={searchMode === "gender" ? submittedName : submittedName1}
+                sex1={searchMode === "gender" ? submittedSex1 : submittedSex1}
               />
             ) : (
               <>
@@ -840,7 +880,7 @@ ${dataToExport
             )}
           </div>
         )}
-        {searchMode === "compare" && (
+        {(searchMode === "compare" || searchMode === "gender") && (
           <div className="md:hidden p-4 text-center">
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-muted-foreground">
@@ -855,19 +895,20 @@ ${dataToExport
 
         <div
           className={
-            searchMode === "compare"
+            searchMode === "compare" || searchMode === "gender"
               ? "hidden md:flex flex-row space-x-9 p-9"
               : "flex-1 overflow-auto p-4"
           }
         >
-          {searchMode === "compare" ? (
+          {searchMode === "compare" || searchMode === "gender" ? (
             <>
               <div className="flex-1 overflow-auto">
                 {data.length > 0 ? (
                   <div className="container mx-auto">
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="text-md font-medium pl-2">
-                        {submittedName} ({submittedSex})
+                        {submittedName} (
+                        {searchMode === "gender" ? "Male" : submittedSex})
                       </h3>
                       <div className="flex items-center gap-2">
                         <Button
@@ -948,7 +989,9 @@ ${dataToExport
                   <div className="container mx-auto">
                     <div className="flex justify-between items-center mb-3">
                       <h3 className="text-md font-medium pl-2">
-                        {submittedName1} ({submittedSex1})
+                        {searchMode === "gender"
+                          ? submittedName + " (Female)"
+                          : submittedName1 + " (" + submittedSex1 + ")"}
                       </h3>
                       <div className="flex items-center gap-2">
                         <Button
@@ -1013,9 +1056,11 @@ ${dataToExport
                       </TableBody>
                     </Table>
                   </div>
-                ) : submittedName1 ? (
+                ) : (searchMode as string) === "gender" ? (
                   <div className="h-full flex items-center justify-center flex-col">
-                    <p className="text-muted-foreground">No results found</p>
+                    <p className="text-muted-foreground">
+                      No results found for males
+                    </p>
                     <p className="text-gray-400 text-sm">
                       Years with under five occurances are not shown for privacy
                       reasons
@@ -1023,11 +1068,10 @@ ${dataToExport
                   </div>
                 ) : (
                   <div className="h-full flex items-center justify-center flex-col">
-                    <p className="text-muted-foreground">
-                      No second name selected
-                    </p>
+                    <p className="text-muted-foreground">No results found</p>
                     <p className="text-gray-400 text-sm">
-                      Add a second name to compare data
+                      Years with under five occurances are not shown for privacy
+                      reasons
                     </p>
                   </div>
                 )}
