@@ -181,7 +181,18 @@ export default function Geo({
 
       d3.select(svgRef.current).selectAll("*").remove();
 
-      const colorrange = ["#70b8ff", "#429bfa", "#147df5", "#095dd7", "#0000ff", "#0000b8", "#00008f", "#000079", "#000052", "#00003d"]
+      const colorrange = [
+        "#70b8ff",
+        "#429bfa",
+        "#147df5",
+        "#095dd7",
+        "#0000ff",
+        "#0000b8",
+        "#00008f",
+        "#000079",
+        "#000052",
+        "#00003d",
+      ];
       const color = d3.scaleQuantize<string>().domain([0, 100]);
       // color.range([
       //   "#4a6b85",

@@ -72,7 +72,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
           const response = await fetch(url);
           if (!response.ok) {
             throw new Error(
-              `API request failed with status ${response.status}`
+              `API request failed with status ${response.status}`,
             );
           }
           return response.json();
@@ -242,10 +242,10 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
                   tickMargin={8}
                   minTickGap={32}
                 />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
-            />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="line" />}
+                />
 
                 <Area
                   name={name}

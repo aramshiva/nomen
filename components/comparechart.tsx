@@ -72,7 +72,7 @@ export default function Chart({ name, sex, name1, sex1 }: ChartProps) {
           const response = await fetch(url);
           if (!response.ok) {
             throw new Error(
-              `API request failed with status ${response.status}`
+              `API request failed with status ${response.status}`,
             );
           }
           return response.json();

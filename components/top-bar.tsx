@@ -24,7 +24,11 @@ export function TopBar({
           >
             Nomen
           </motion.a>
-            {title && <h1 className="text-lg font-semibold font-gosha lowercase self-end mb-1">{title}</h1>}
+          {title && (
+            <h1 className="text-lg font-semibold font-gosha lowercase self-end mb-1">
+              {title}
+            </h1>
+          )}
         </div>
         <div className="flex gap-4 w-full md:w-auto">
           {children && <div className="flex-1 md:flex-initial">{children}</div>}

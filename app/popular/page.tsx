@@ -30,7 +30,7 @@ interface PopularNameData {
   rank: number;
   year?: number;
 }
- 
+
 export default function PopularNamesPage() {
   const [year, setYear] = useState<string>("all");
   const [sex, setSex] = useState<string>("all");
@@ -57,7 +57,7 @@ export default function PopularNamesPage() {
 
   const fetchPopularNames = async (pageNum = 1, shouldAppend = false) => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     try {
       const pageSize = 100;
@@ -82,7 +82,7 @@ export default function PopularNamesPage() {
           setHasMore(false);
           return;
         }
-        
+
         const sortedData = result.data.sort(
           (a: PopularNameData, b: PopularNameData) => b.amount - a.amount,
         );
@@ -96,7 +96,7 @@ export default function PopularNamesPage() {
         );
 
         if (shouldAppend) {
-          setData(prevData => [...prevData, ...rankedData]);
+          setData((prevData) => [...prevData, ...rankedData]);
         } else {
           setData(rankedData);
         }
@@ -150,15 +150,15 @@ export default function PopularNamesPage() {
           loadMoreItems();
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
-    
+
     observerRef.current = observer;
-    
+
     if (lastItemRef.current) {
       observer.observe(lastItemRef.current);
     }
-    
+
     return () => observer.disconnect();
   }, [loadMoreItems, initialLoad]);
 
@@ -221,8 +221,8 @@ export default function PopularNamesPage() {
               </TableHeader>
               <TableBody>
                 {data.map((item, index) => (
-                  <TableRow 
-                    key={index} 
+                  <TableRow
+                    key={index}
                     ref={index === data.length - 10 ? lastItemRef : null}
                   >
                     <TableCell>{item.rank}</TableCell>

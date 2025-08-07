@@ -26,10 +26,7 @@ export async function GET(request: NextRequest) {
       condition = eq(names.year, parseInt(year));
     }
 
-    const query = db
-      .select()
-      .from(names)
-      .where(condition);
+    const query = db.select().from(names).where(condition);
 
     const result = await query
       .orderBy(desc(names.amount))
