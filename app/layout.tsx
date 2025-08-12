@@ -24,11 +24,11 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Nomen",
   description:
-    "A parser for every name listed on a social security card between 1880-2023, tabulated from the United States Social Security Adminstration's data.",
+    "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data.",
   openGraph: {
     title: "Nomen",
     description:
-      "A parser for every name listed on a social security card between 1880-2023, tabulated from the United States Social Security Adminstration's data.",
+      "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data.",
     url: "https://nomen.aram.sh",
     siteName: "Nomen",
     images: [

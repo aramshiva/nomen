@@ -71,16 +71,16 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlName1 = searchParams.get("name1");
   const urlSex1 =
     searchParams.get("sex1")?.toUpperCase() ||
     (searchParams.get("sex1")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex1")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
   const urlSearchMode = searchParams.get("mode");
   // const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
@@ -88,12 +88,12 @@ function Search() {
   const [name1, setName1] = useState(urlName1 || "");
   const [sex1, setSex1] = useState(urlSex1 || "");
   const [searchMode, setSearchMode] = useState<SearchMode>(
-    (urlSearchMode as SearchMode) || "regular"
+    (urlSearchMode as SearchMode) || "regular",
   );
   // const [showActuary, setShowActuary] = useState(urlActuary === "true");
   const [data, setData] = useState<NameData[]>([]);
   const [data1, setData1] = useState<NameData[]>([]);
-  
+
   const [popularData, setPopularData] = useState<PopularNameData[]>([]);
   const [popularYear, setPopularYear] = useState<string>("all");
   const [popularSex, setPopularSex] = useState<string>("all");
@@ -103,7 +103,7 @@ function Search() {
   const [initialLoad, setInitialLoad] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastItemRef = useRef<HTMLTableRowElement | null>(null);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
@@ -124,68 +124,71 @@ function Search() {
     }
   }, []);
 
-  const fetchPopularNames = useCallback(async (pageNum = 1, shouldAppend = false) => {
-    if (isLoading) return;
+  const fetchPopularNames = useCallback(
+    async (pageNum = 1, shouldAppend = false) => {
+      if (isLoading) return;
 
-    setIsLoading(true);
-    try {
-      const pageSize = 100;
-      let apiUrl;
-      if (popularYear === "all") {
-        apiUrl = `/api/popular/all?page=${pageNum}&pageSize=${pageSize}`;
-        if (popularSex !== "all") {
-          apiUrl += `&sex=${popularSex}`;
-        }
-      } else {
-        apiUrl = `/api/year?year=${popularYear}&page=${pageNum}&pageSize=${pageSize}`;
-        if (popularSex !== "all") {
-          apiUrl += `&sex=${popularSex}`;
-        }
-      }
-
-      const response = await fetch(apiUrl);
-      const result = await response.json();
-
-      if (result.success && Array.isArray(result.data)) {
-        if (result.data.length === 0) {
-          setHasMore(false);
-          return;
-        }
-
-        const sortedData = result.data.sort(
-          (a: PopularNameData, b: PopularNameData) => b.amount - a.amount,
-        );
-
-        const startRank = (pageNum - 1) * pageSize + 1;
-        const rankedData: PopularNameData[] = sortedData.map(
-          (item: PopularNameData, index: number) => ({
-            ...item,
-            rank: startRank + index,
-          }),
-        );
-
-        if (shouldAppend) {
-          setPopularData((prevData) => [...prevData, ...rankedData]);
+      setIsLoading(true);
+      try {
+        const pageSize = 100;
+        let apiUrl;
+        if (popularYear === "all") {
+          apiUrl = `/api/popular/all?page=${pageNum}&pageSize=${pageSize}`;
+          if (popularSex !== "all") {
+            apiUrl += `&sex=${popularSex}`;
+          }
         } else {
-          setPopularData(rankedData);
+          apiUrl = `/api/year?year=${popularYear}&page=${pageNum}&pageSize=${pageSize}`;
+          if (popularSex !== "all") {
+            apiUrl += `&sex=${popularSex}`;
+          }
         }
-      } else {
+
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+
+        if (result.success && Array.isArray(result.data)) {
+          if (result.data.length === 0) {
+            setHasMore(false);
+            return;
+          }
+
+          const sortedData = result.data.sort(
+            (a: PopularNameData, b: PopularNameData) => b.amount - a.amount,
+          );
+
+          const startRank = (pageNum - 1) * pageSize + 1;
+          const rankedData: PopularNameData[] = sortedData.map(
+            (item: PopularNameData, index: number) => ({
+              ...item,
+              rank: startRank + index,
+            }),
+          );
+
+          if (shouldAppend) {
+            setPopularData((prevData) => [...prevData, ...rankedData]);
+          } else {
+            setPopularData(rankedData);
+          }
+        } else {
+          if (!shouldAppend) {
+            setPopularData([]);
+          }
+          setHasMore(false);
+        }
+      } catch (error) {
+        console.error("Error fetching popular names:", error);
         if (!shouldAppend) {
           setPopularData([]);
         }
         setHasMore(false);
+      } finally {
+        setIsLoading(false);
+        setInitialLoad(false);
       }
-    } catch (error) {
-      console.error("Error fetching popular names:", error);
-      if (!shouldAppend) {
-        setPopularData([]);
-      }
-      setHasMore(false);
-    } finally {
-      setIsLoading(false);
-      setInitialLoad(false);
-    }
-  }, [isLoading, popularYear, popularSex]);
+    },
+    [isLoading, popularYear, popularSex],
+  );
 
   const loadMoreItems = useCallback(() => {
     if (!isLoading && hasMore) {
@@ -198,7 +201,7 @@ function Search() {
   const performSearch = async (
     searchName: string,
     searchSex?: string,
-    isSecond = false
+    isSecond = false,
   ) => {
     setIsLoading(true);
     try {
@@ -231,13 +234,13 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
     if (searchMode === "popular") {
       await fetchPopularNames();
       setHasSearched(true);
       return;
     }
-    
+
     if (!name) {
       return;
     }
@@ -390,7 +393,7 @@ function Search() {
     const csvContent = [
       headers.join(","),
       ...dataToExport.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
       ),
     ].join("\n");
 
@@ -444,7 +447,7 @@ ${dataToExport
     <sex>${item.sex}</sex>
     <amount>${item.amount}</amount>
     <year>${item.year}</year>
-  </record>`
+  </record>`,
   )
   .join("\n")}
 </nameData>`;
@@ -563,7 +566,7 @@ ${dataToExport
             <td>${item.amount}</td>
             <td>${item.year}</td>
           </tr>
-        `
+        `,
           )
           .join("")}
       </tbody>
@@ -608,12 +611,12 @@ ${dataToExport
             </motion.p>
             <p className="text-muted-foreground text-sm pb-5">
               {searchMode === "compare"
-                ? "Compare trends between two names from 1880-2023, using data from the United States Social Security Administration."
+                ? "Compare trends between two names from 1880-2024, using data from the United States Social Security Administration."
                 : searchMode === "gender"
-                ? "Search for a name across both genders to see combined usage trends from 1880-2024, using data from the United States Social Security Administration."
-                : searchMode === "popular"
-                ? "Browse the most popular names by year and gender from 1880-2024, using data from the United States Social Security Administration."
-                : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
+                  ? "Search for a name across both genders to see combined usage trends from 1880-2024, using data from the United States Social Security Administration."
+                  : searchMode === "popular"
+                    ? "Browse the most popular names by year and gender from 1880-2024, using data from the United States Social Security Administration."
+                    : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
               {searchMode === "popular" ? (
@@ -819,9 +822,7 @@ ${dataToExport
                           </div>
 
                           <div>
-                            <p className="font-medium text-xs">
-                              Popular
-                            </p>
+                            <p className="font-medium text-xs">Popular</p>
                             <p className="text-xs text-muted-foreground">
                               View popularity trends for the most popular names.
                             </p>
@@ -863,20 +864,18 @@ ${dataToExport
                     transition={{ duration: 0.6 }}
                   >
                     {isLoading
-                      ? searchMode === "popular" ? "Loading..." : "Searching..."
+                      ? searchMode === "popular"
+                        ? "Loading..."
+                        : "Searching..."
                       : searchMode === "compare"
-                      ? "Compare"
-                      : searchMode === "popular"
-                      ? "View Popular Names"
-                      : "Search"}
+                        ? "Compare"
+                        : searchMode === "popular"
+                          ? "View Popular Names"
+                          : "Search"}
                   </motion.span>
                 </Button>
               </motion.div>
               <div className="flex justify-center items-center text-sm text-muted-foreground flex-row gap-2">
-                <Link href="/popular" className="underline">
-                  Popular Names
-                </Link>
-                {" | "}
                 <Link href="/about" className="underline">
                   About
                 </Link>
@@ -887,8 +886,8 @@ ${dataToExport
                       theme === "dark"
                         ? "light"
                         : theme === "system"
-                        ? "light"
-                        : "dark"
+                          ? "light"
+                          : "dark",
                     )
                   }
                   className="underline"
@@ -911,10 +910,10 @@ ${dataToExport
             searchMode === "compare"
               ? "COMPARE"
               : searchMode === "gender"
-              ? "GENDER"
-              : searchMode === "popular"
-              ? "POPULAR"
-              : ""
+                ? "GENDER"
+                : searchMode === "popular"
+                  ? "POPULAR"
+                  : ""
           }
         >
           <form
@@ -1060,52 +1059,65 @@ ${dataToExport
                   transition={{ duration: 0.6 }}
                 >
                   {isLoading
-                    ? searchMode === "popular" ? "Loading..." : "Searching..."
+                    ? searchMode === "popular"
+                      ? "Loading..."
+                      : "Searching..."
                     : searchMode === "compare"
-                    ? "Compare"
-                    : searchMode === "popular"
-                    ? "View Popular Names"
-                    : "Search"}
+                      ? "Compare"
+                      : searchMode === "popular"
+                        ? "View Popular Names"
+                        : "Search"}
                 </motion.span>
               </Button>
             </motion.div>
           </form>
         </TopBar>
-        {(data.length > 0 || (searchMode === "popular" && popularData.length > 0)) && searchMode !== "popular" && (
-          <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 gap-3 md:gap-2">
-            {searchMode === "compare" || searchMode === "gender" ? (
-              <CompareChart
-                name={submittedName}
-                sex={submittedSex}
-                name1={searchMode === "gender" ? submittedName : submittedName1}
-                sex1={searchMode === "gender" ? submittedSex1 : submittedSex1}
-              />
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
-                  <Chart name={submittedName} sex={submittedSex} />
-                  <Heatmap sex={submittedSex} name={submittedName} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
-                  <Actuary name={submittedName} sex={submittedSex} />
-                  <Numbers name={submittedName} sex={submittedSex} />
-                </div>
-              </>
-            )}
-          </div>
-        )}
-        
+        {(data.length > 0 ||
+          (searchMode === "popular" && popularData.length > 0)) &&
+          searchMode !== "popular" && (
+            <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 gap-3 md:gap-2">
+              {searchMode === "compare" || searchMode === "gender" ? (
+                <CompareChart
+                  name={submittedName}
+                  sex={submittedSex}
+                  name1={
+                    searchMode === "gender" ? submittedName : submittedName1
+                  }
+                  sex1={searchMode === "gender" ? submittedSex1 : submittedSex1}
+                />
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
+                    <Chart name={submittedName} sex={submittedSex} />
+                    <Heatmap sex={submittedSex} name={submittedName} />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
+                    <Actuary name={submittedName} sex={submittedSex} />
+                    <Numbers name={submittedName} sex={submittedSex} />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
         {searchMode === "popular" && (
           <div className="flex-1 overflow-auto p-4">
             {initialLoad && isLoading ? (
               <div className="h-full flex items-center justify-center">
-                <p className="text-muted-foreground">Loading popular names...</p>
+                <p className="text-muted-foreground">
+                  Loading popular names...
+                </p>
               </div>
             ) : popularData.length > 0 ? (
               <div className="container mx-auto">
                 <h2 className="text-xl font-semibold mb-4">
                   {popularYear === "all" ? "All Time" : popularYear}{" "}
-                  {popularSex === "M" ? "Male" : popularSex === "F" ? "Female" : ""} Names
+                  {popularSex === "M"
+                    ? "Male"
+                    : popularSex === "F"
+                      ? "Female"
+                      : ""}{" "}
+                  Names
                 </h2>
                 <Table>
                   <TableHeader className="sticky top-0 bg-background">
@@ -1120,7 +1132,9 @@ ${dataToExport
                     {popularData.map((item, index) => (
                       <TableRow
                         key={index}
-                        ref={index === popularData.length - 10 ? lastItemRef : null}
+                        ref={
+                          index === popularData.length - 10 ? lastItemRef : null
+                        }
                       >
                         <TableCell>{item.rank}</TableCell>
                         <TableCell className="font-medium">
@@ -1143,12 +1157,16 @@ ${dataToExport
                 </Table>
                 {isLoading && !initialLoad && (
                   <div className="py-4 text-center">
-                    <p className="text-muted-foreground">Loading more names...</p>
+                    <p className="text-muted-foreground">
+                      Loading more names...
+                    </p>
                   </div>
                 )}
                 {!hasMore && (
                   <div className="py-4 text-center">
-                    <p className="text-muted-foreground">No more names to load</p>
+                    <p className="text-muted-foreground">
+                      No more names to load
+                    </p>
                   </div>
                 )}
               </div>
@@ -1159,7 +1177,7 @@ ${dataToExport
             )}
           </div>
         )}
-        
+
         {(searchMode === "compare" || searchMode === "gender") && (
           <div className="md:hidden p-4 text-center">
             <div className="bg-secondary/30 rounded-lg p-4">
@@ -1178,8 +1196,8 @@ ${dataToExport
             searchMode === "compare" || searchMode === "gender"
               ? "hidden md:flex flex-row space-x-9 p-9"
               : searchMode === "popular"
-              ? "hidden"
-              : "flex-1 overflow-auto p-4"
+                ? "hidden"
+                : "flex-1 overflow-auto p-4"
           }
         >
           {searchMode === "compare" || searchMode === "gender" ? (
