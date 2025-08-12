@@ -18,18 +18,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import Chart from "@/components/chart";
+import CompareChart from "@/components/comparechart";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/top-bar";
 // import { Checkbox } from "@/components/ui/checkbox";
 // import { Badge } from "@/components/ui/badge";
 import Heatmap from "@/components/heatmap";
-import { Download } from "lucide-react";
+import { Download, SearchIcon } from "lucide-react";
 import Actuary from "@/components/actuary";
 import Numbers from "@/components/numbers";
+import { useTheme } from "next-themes";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 const inter = Inter({ subsets: ["latin"] });
 import {
   DropdownMenu,
@@ -37,6 +44,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface NameData {
   name: string;
@@ -44,6 +52,16 @@ interface NameData {
   amount: number;
   year: number;
 }
+
+interface PopularNameData {
+  name: string;
+  sex: string;
+  amount: number;
+  rank: number;
+  year?: number;
+}
+
+type SearchMode = "regular" | "compare" | "gender" | "popular";
 
 function Search() {
   const searchParams = useSearchParams();
@@ -53,29 +71,160 @@ function Search() {
     (searchParams.get("sex")?.toLowerCase() === "male"
       ? "M"
       : searchParams.get("sex")?.toLowerCase() === "female"
-      ? "F"
-      : "");
+        ? "F"
+        : "");
+  const urlName1 = searchParams.get("name1");
+  const urlSex1 =
+    searchParams.get("sex1")?.toUpperCase() ||
+    (searchParams.get("sex1")?.toLowerCase() === "male"
+      ? "M"
+      : searchParams.get("sex1")?.toLowerCase() === "female"
+        ? "F"
+        : "");
+  const urlSearchMode = searchParams.get("mode");
   // const urlActuary = searchParams.get("actuary");
   const [name, setName] = useState(urlName || "");
   const [sex, setSex] = useState(urlSex || "");
+  const [name1, setName1] = useState(urlName1 || "");
+  const [sex1, setSex1] = useState(urlSex1 || "");
+  const [searchMode, setSearchMode] = useState<SearchMode>(
+    (urlSearchMode as SearchMode) || "regular",
+  );
   // const [showActuary, setShowActuary] = useState(urlActuary === "true");
   const [data, setData] = useState<NameData[]>([]);
+  const [data1, setData1] = useState<NameData[]>([]);
+
+  const [popularData, setPopularData] = useState<PopularNameData[]>([]);
+  const [popularYear, setPopularYear] = useState<string>("all");
+  const [popularSex, setPopularSex] = useState<string>("all");
+  const [popularYearOptions, setPopularYearOptions] = useState<string[]>([]);
+  const [popularPage, setPopularPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastItemRef = useRef<HTMLTableRowElement | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
   const [submittedSex, setSubmittedSex] = useState("");
+  const [submittedName1, setSubmittedName1] = useState("");
+  const [submittedSex1, setSubmittedSex1] = useState("");
+  const { theme, setTheme } = useTheme();
 
-  const performSearch = async (searchName: string, searchSex: string) => {
+  const fetchPopularYearOptions = useCallback(async () => {
+    try {
+      const years = [];
+      for (let y = 2024; y >= 1880; y--) {
+        years.push(y.toString());
+      }
+      setPopularYearOptions(["all", ...years]);
+    } catch (error) {
+      console.error("Error fetching year options:", error);
+    }
+  }, []);
+
+  const fetchPopularNames = useCallback(
+    async (pageNum = 1, shouldAppend = false) => {
+      if (isLoading) return;
+
+      setIsLoading(true);
+      try {
+        const pageSize = 100;
+        let apiUrl;
+        if (popularYear === "all") {
+          apiUrl = `/api/popular/all?page=${pageNum}&pageSize=${pageSize}`;
+          if (popularSex !== "all") {
+            apiUrl += `&sex=${popularSex}`;
+          }
+        } else {
+          apiUrl = `/api/year?year=${popularYear}&page=${pageNum}&pageSize=${pageSize}`;
+          if (popularSex !== "all") {
+            apiUrl += `&sex=${popularSex}`;
+          }
+        }
+
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+
+        if (result.success && Array.isArray(result.data)) {
+          if (result.data.length === 0) {
+            setHasMore(false);
+            return;
+          }
+
+          const sortedData = result.data.sort(
+            (a: PopularNameData, b: PopularNameData) => b.amount - a.amount,
+          );
+
+          const startRank = (pageNum - 1) * pageSize + 1;
+          const rankedData: PopularNameData[] = sortedData.map(
+            (item: PopularNameData, index: number) => ({
+              ...item,
+              rank: startRank + index,
+            }),
+          );
+
+          if (shouldAppend) {
+            setPopularData((prevData) => [...prevData, ...rankedData]);
+          } else {
+            setPopularData(rankedData);
+          }
+        } else {
+          if (!shouldAppend) {
+            setPopularData([]);
+          }
+          setHasMore(false);
+        }
+      } catch (error) {
+        console.error("Error fetching popular names:", error);
+        if (!shouldAppend) {
+          setPopularData([]);
+        }
+        setHasMore(false);
+      } finally {
+        setIsLoading(false);
+        setInitialLoad(false);
+      }
+    },
+    [isLoading, popularYear, popularSex],
+  );
+
+  const loadMoreItems = useCallback(() => {
+    if (!isLoading && hasMore) {
+      const nextPage = popularPage + 1;
+      setPopularPage(nextPage);
+      fetchPopularNames(nextPage, true);
+    }
+  }, [isLoading, hasMore, popularPage, fetchPopularNames]);
+
+  const performSearch = async (
+    searchName: string,
+    searchSex?: string,
+    isSecond = false,
+  ) => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/names?name=${searchName}&sex=${searchSex}`
-      );
+      const url = searchSex
+        ? `/api/names?name=${searchName}&sex=${searchSex}`
+        : `/api/names?name=${searchName}`;
+
+      const response = await fetch(url);
       const result = await response.json();
-      setData(result);
-      setHasSearched(true);
-      setSubmittedName(searchName);
-      setSubmittedSex(searchSex);
+
+      if (isSecond) {
+        setData1(result);
+        setSubmittedName1(searchName);
+        setSubmittedSex1(searchSex || "");
+      } else {
+        setData(result);
+        setSubmittedName(searchName);
+        setSubmittedSex(searchSex || "");
+      }
+
+      if (!hasSearched) {
+        setHasSearched(true);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -85,57 +234,166 @@ function Search() {
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!name || !sex) {
+
+    if (searchMode === "popular") {
+      await fetchPopularNames();
+      setHasSearched(true);
+      return;
+    }
+
+    if (!name) {
+      return;
+    }
+
+    if (searchMode !== "gender" && !sex) {
+      return;
+    }
+
+    if (searchMode === "compare" && (!name1 || !sex1)) {
       return;
     }
 
     const url = new URL(window.location.href);
     url.searchParams.set("name", name);
-    url.searchParams.set("sex", sex);
-    // if (showActuary) url.searchParams.set("actuary", "true");
+    url.searchParams.set("mode", searchMode);
+
+    if (searchMode === "compare") {
+      url.searchParams.set("sex", sex);
+      if (name1 && sex1) {
+        url.searchParams.set("name1", name1);
+        url.searchParams.set("sex1", sex1);
+      }
+    } else if (searchMode === "gender") {
+      url.searchParams.delete("sex");
+      url.searchParams.delete("name1");
+      url.searchParams.delete("sex1");
+    } else {
+      url.searchParams.set("sex", sex);
+      url.searchParams.delete("name1");
+      url.searchParams.delete("sex1");
+    }
+
     window.history.pushState({}, "", url);
 
-    await performSearch(name, sex);
+    if (searchMode === "gender") {
+      await performSearch(name, "M");
+      await performSearch(name, "F", true);
+    } else if (searchMode === "compare" && name1 && sex1) {
+      await performSearch(name, sex);
+      await performSearch(name1, sex1, true);
+    } else {
+      await performSearch(name, sex);
+    }
   };
+
+  useEffect(() => {
+    if (searchMode === "popular") {
+      fetchPopularYearOptions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchMode]);
+
+  useEffect(() => {
+    if (searchMode === "popular") {
+      setPopularPage(1);
+      setHasMore(true);
+      fetchPopularNames(1, false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [popularYear, popularSex]);
+
+  useEffect(() => {
+    if (searchMode === "popular") {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting && !initialLoad) {
+            loadMoreItems();
+          }
+        },
+        { threshold: 0.5 },
+      );
+
+      observerRef.current = observer;
+
+      if (lastItemRef.current) {
+        observer.observe(lastItemRef.current);
+      }
+
+      return () => observer.disconnect();
+    }
+  }, [loadMoreItems, initialLoad, searchMode]);
 
   useEffect(() => {
     const handlePopState = () => {
       const currentUrl = new URL(window.location.href);
       const currentName = currentUrl.searchParams.get("name");
       const currentSex = currentUrl.searchParams.get("sex");
+      const currentName1 = currentUrl.searchParams.get("name1");
+      const currentSex1 = currentUrl.searchParams.get("sex1");
+      const currentMode = currentUrl.searchParams.get("mode");
 
       if (currentName && currentSex) {
         setName(currentName);
         setSex(currentSex);
+        setSearchMode((currentMode as SearchMode) || "regular");
         performSearch(currentName, currentSex);
+
+        if (currentMode === "compare" && currentName1 && currentSex1) {
+          setName1(currentName1);
+          setSex1(currentSex1);
+          performSearch(currentName1, currentSex1, true);
+        }
       } else {
         setHasSearched(false);
         setData([]);
+        setData1([]);
       }
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (urlName && urlSex && !hasSearched) {
       setName(urlName);
       setSex(urlSex);
+      setSearchMode((urlSearchMode as SearchMode) || "regular");
       // setShowActuary(urlActuary === "true");
       performSearch(urlName, urlSex);
+
+      if (urlSearchMode === "compare" && urlName1 && urlSex1) {
+        setName1(urlName1);
+        setSex1(urlSex1);
+        performSearch(urlName1, urlSex1, true);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlName, urlSex]);
+  }, [urlName, urlSex, urlName1, urlSex1, urlSearchMode]);
 
-  const exportToCsv = () => {
-    if (data.length === 0) return;
+  const diveDeeper = (dataSet: number = 0) => {
+    const nameToExport = dataSet === 0 ? submittedName : submittedName1;
+    const sexToExport = dataSet === 0 ? submittedSex : submittedSex1;
+    const url = "https://nomen.sh?name=" + nameToExport + "&sex=" + sexToExport;
+    window.open(url, "_blank");
+  };
+  const exportToCsv = (dataSet: number = 0) => {
+    const dataToExport = dataSet === 0 ? data : data1;
+    const nameToExport = dataSet === 0 ? submittedName : submittedName1;
+    const sexToExport = dataSet === 0 ? submittedSex : submittedSex1;
+
+    if (dataToExport.length === 0) return;
 
     const headers = ["Name", "Sex", "Amount", "Year"];
     const csvContent = [
       headers.join(","),
-      ...data.map(
-        (item) => `${item.name},${item.sex},${item.amount},${item.year}`
+      ...dataToExport.map(
+        (item) => `${item.name},${item.sex},${item.amount},${item.year}`,
       ),
     ].join("\n");
 
@@ -143,7 +401,7 @@ function Search() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `${submittedName}-${submittedSex}.csv`);
+    link.setAttribute("download", `${nameToExport}-${sexToExport}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -151,17 +409,21 @@ function Search() {
     URL.revokeObjectURL(url);
   };
 
-  const exportToJson = () => {
-    if (data.length === 0) return;
+  const exportToJson = (dataSet: number = 0) => {
+    const dataToExport = dataSet === 0 ? data : data1;
+    const nameToExport = dataSet === 0 ? submittedName : submittedName1;
+    const sexToExport = dataSet === 0 ? submittedSex : submittedSex1;
 
-    const jsonContent = JSON.stringify(data, null, 2);
+    if (dataToExport.length === 0) return;
+
+    const jsonContent = JSON.stringify(dataToExport, null, 2);
     const blob = new Blob([jsonContent], {
       type: "application/json;charset=utf-8;",
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `${submittedName}-${submittedSex}.json`);
+    link.setAttribute("download", `${nameToExport}-${sexToExport}.json`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -169,19 +431,23 @@ function Search() {
     URL.revokeObjectURL(url);
   };
 
-  const exportToXml = () => {
-    if (data.length === 0) return;
+  const exportToXml = (dataSet: number = 0) => {
+    const dataToExport = dataSet === 0 ? data : data1;
+    const nameToExport = dataSet === 0 ? submittedName : submittedName1;
+    const sexToExport = dataSet === 0 ? submittedSex : submittedSex1;
+
+    if (dataToExport.length === 0) return;
 
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <nameData>
-${data
+${dataToExport
   .map(
     (item) => `  <record>
     <name>${item.name}</name>
     <sex>${item.sex}</sex>
     <amount>${item.amount}</amount>
     <year>${item.year}</year>
-  </record>`
+  </record>`,
   )
   .join("\n")}
 </nameData>`;
@@ -192,7 +458,7 @@ ${data
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `${submittedName}-${submittedSex}.xml`);
+    link.setAttribute("download", `${nameToExport}-${sexToExport}.xml`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -200,9 +466,11 @@ ${data
     URL.revokeObjectURL(url);
   };
 
-  const exportToPdf = () => {
-    if (data.length === 0) return;
-  const htmlContent = `
+  const exportToPdf = (dataSet: number = 0) => {
+    const dataToExport = dataSet === 0 ? data : data1;
+
+    if (dataToExport.length === 0) return;
+    const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -289,7 +557,7 @@ ${data
         </tr>
       </thead>
       <tbody>
-        ${data
+        ${dataToExport
           .map(
             (item) => `
           <tr>
@@ -298,7 +566,7 @@ ${data
             <td>${item.amount}</td>
             <td>${item.year}</td>
           </tr>
-        `
+        `,
           )
           .join("")}
       </tbody>
@@ -330,40 +598,258 @@ ${data
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
           <div className="w-[30rem] max-w-full">
             <motion.p className="font-bold text-2xl font-gosha lowercase pb-1">
-              Nomen
+              Nomen{" "}
+              {searchMode === "compare" && (
+                <span className="text-lg">COMPARE</span>
+              )}
+              {searchMode === "gender" && (
+                <span className="text-lg">GENDER</span>
+              )}
+              {searchMode === "popular" && (
+                <span className="text-lg">POPULAR</span>
+              )}
             </motion.p>
             <p className="text-muted-foreground text-sm pb-5">
-              A parser for every name listed on a social security card between
-              1880-2024, tabulated from the United States Social Security
-              Adminstration{"'"}s data.
+              {searchMode === "compare"
+                ? "Compare trends between two names from 1880-2024, using data from the United States Social Security Administration."
+                : searchMode === "gender"
+                  ? "Search for a name across both genders to see combined usage trends from 1880-2024, using data from the United States Social Security Administration."
+                  : searchMode === "popular"
+                    ? "Browse the most popular names by year and gender from 1880-2024, using data from the United States Social Security Administration."
+                    : "A parser for every name listed on a social security card between 1880-2024, tabulated from the United States Social Security Adminstration's data."}
             </p>
             <form onSubmit={handleSearch} className="flex flex-col space-y-5">
-              <motion.div
-                className="flex flex-col space-y-2"
-                layoutId="name-input-container"
-              >
-                <p>First Name:</p>
-                <motion.div layoutId="name-input">
-                  <Input
-                    type="text"
-                    placeholder="Enter a name"
-                    className="w-full"
-                    aria-label="Name search"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </motion.div>
-              </motion.div>
-              <motion.div className="" layoutId="sex-select-container">
-                <p>Sex:</p>
-                <motion.div layoutId="sex-select">
-                  <Select value={sex} onValueChange={setSex}>
+              {searchMode === "popular" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <motion.div className="flex flex-col space-y-2">
+                    <p>Year:</p>
+                    <Select value={popularYear} onValueChange={setPopularYear}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {popularYearOptions.map((y) => (
+                          <SelectItem key={y} value={y}>
+                            {y === "all" ? "All Time" : y}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                  <motion.div className="flex flex-col space-y-2">
+                    <p>Sex:</p>
+                    <Select value={popularSex} onValueChange={setPopularSex}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sex" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="M">Male</SelectItem>
+                        <SelectItem value="F">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                </div>
+              ) : searchMode === "regular" || searchMode === "gender" ? (
+                <div
+                  className={
+                    (searchMode as string) === "gender"
+                      ? "grid grid-cols-1 gap-4"
+                      : "grid grid-cols-1 md:grid-cols-2 gap-4"
+                  }
+                >
+                  <motion.div
+                    className="flex flex-col space-y-2"
+                    layoutId="name-input-container"
+                  >
+                    <p>First Name:</p>
+                    <motion.div layoutId="name-input">
+                      <Input
+                        type="text"
+                        placeholder="Enter a name"
+                        className="w-full"
+                        aria-label="Name search"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </motion.div>
+                  </motion.div>
+                  {(searchMode as string) !== "gender" && (
+                    <motion.div
+                      className="flex flex-col space-y-2"
+                      layoutId="sex-select-container"
+                    >
+                      <p>Sex:</p>
+                      <motion.div layoutId="sex-select">
+                        <Select value={sex} onValueChange={setSex}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="M">Male</SelectItem>
+                            <SelectItem value="F">Female</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-5">
+                    <motion.div
+                      className="flex flex-col space-y-2"
+                      layoutId="name-input-container"
+                    >
+                      <p>First Name:</p>
+                      <motion.div layoutId="name-input">
+                        <Input
+                          type="text"
+                          placeholder="Enter a name"
+                          className="w-full"
+                          aria-label="Name search"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                        />
+                      </motion.div>
+                    </motion.div>
+                    <motion.div
+                      className="flex flex-col space-y-2"
+                      layoutId="sex-select-container"
+                    >
+                      <p>Sex:</p>
+                      <motion.div layoutId="sex-select">
+                        <Select value={sex} onValueChange={setSex}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="M">Male</SelectItem>
+                            <SelectItem value="F">Female</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                  <div className="space-y-5">
+                    <motion.div
+                      className="flex flex-col space-y-2"
+                      layoutId="name1-input-container"
+                    >
+                      <p>Second Name</p>
+                      <motion.div layoutId="name1-input">
+                        <Input
+                          type="text"
+                          placeholder="Enter a name to compare"
+                          className="w-full"
+                          aria-label="Second name search"
+                          value={name1}
+                          onChange={(e) => setName1(e.target.value)}
+                        />
+                      </motion.div>
+                    </motion.div>
+                    <motion.div
+                      className="flex flex-col space-y-2"
+                      layoutId="sex1-select-container"
+                    >
+                      <p>Sex:</p>
+                      <motion.div layoutId="sex1-select">
+                        <Select value={sex1} onValueChange={setSex1}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="M">Male</SelectItem>
+                            <SelectItem value="F">Female</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                </div>
+              )}
+              <motion.div className="" layoutId="search-mode-select-container">
+                <div className="pb-1 flex items-center space-x-2">
+                  <p>Search Mode:</p>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Badge variant="outline">?</Badge>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-[35rem]">
+                      <div className="space-y-2">
+                        <div>
+                          <p className="font-semibold text-xs">Search Modes</p>
+                          <p className="text-xs text-muted-foreground">
+                            Choose how you want to explore name data from
+                            1880-2024
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div>
+                            <p className="font-medium text-xs">Regular</p>
+                            <p className="text-xs text-muted-foreground">
+                              Search popularity trends for a single name by
+                              gender
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="font-medium text-xs">Compare</p>
+                            <p className="text-xs text-muted-foreground">
+                              Compare popularity trends between two names
+                              side-by-side
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="font-medium text-xs">Gender</p>
+                            <p className="text-xs text-muted-foreground">
+                              View combined trends across both male and female
+                              usage on one name.
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="font-medium text-xs">
+                              Actuary (coming soon)
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              View actuarial data for the name, including
+                              estimated lifespan and other statistics. (this
+                              data is shown in regular as well!)
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="font-medium text-xs">Popular</p>
+                            <p className="text-xs text-muted-foreground">
+                              View popularity trends for the most popular names.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+                <motion.div layoutId="search-mode-select">
+                  <Select
+                    value={searchMode}
+                    onValueChange={(value) => {
+                      setSearchMode(value as SearchMode);
+                    }}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder="Select search mode" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="M">Male</SelectItem>
-                      <SelectItem value="F">Female</SelectItem>
+                      <SelectItem value="regular">Regular</SelectItem>
+                      <SelectItem value="compare">Compare</SelectItem>
+                      <SelectItem value="gender">Gender</SelectItem>
+                      <SelectItem value="actuary" disabled>
+                        Actuary
+                      </SelectItem>
+                      <SelectItem value="popular">Popular</SelectItem>
                     </SelectContent>
                   </Select>
                 </motion.div>
@@ -377,22 +863,37 @@ ${data
                     exit={{ opacity: 0, filter: "blur(4px)" }}
                     transition={{ duration: 0.6 }}
                   >
-                    {isLoading ? "Searching..." : "Search"}
+                    {isLoading
+                      ? searchMode === "popular"
+                        ? "Loading..."
+                        : "Searching..."
+                      : searchMode === "compare"
+                        ? "Compare"
+                        : searchMode === "popular"
+                          ? "View Popular Names"
+                          : "Search"}
                   </motion.span>
                 </Button>
               </motion.div>
               <div className="flex justify-center items-center text-sm text-muted-foreground flex-row gap-2">
-                <Link href="/popular" className="underline">
-                  Popular Names
-                </Link>
-                {" | "}
-                <Link href="/compare" className="underline">
-                  Compare Names
-                </Link>
-                {" | "}
                 <Link href="/about" className="underline">
                   About
                 </Link>
+                {" | "}
+                <button
+                  onClick={() =>
+                    setTheme(
+                      theme === "dark"
+                        ? "light"
+                        : theme === "system"
+                          ? "light"
+                          : "dark",
+                    )
+                  }
+                  className="underline"
+                >
+                  Change Theme
+                </button>
               </div>
             </form>
           </div>
@@ -404,38 +905,150 @@ ${data
   return (
     <>
       <div className={inter.className + " min-h-screen flex flex-col"}>
-        <TopBar>
+        <TopBar
+          title={
+            searchMode === "compare"
+              ? "COMPARE"
+              : searchMode === "gender"
+                ? "GENDER"
+                : searchMode === "popular"
+                  ? "POPULAR"
+                  : ""
+          }
+        >
           <form
             onSubmit={handleSearch}
             className="flex-1 flex flex-col md:flex-row gap-4 items-center"
           >
-            <motion.div className="w-full" layoutId="name-input-container">
-              <motion.div layoutId="name-input">
-                <Input
-                  type="text"
-                  placeholder="Enter a name"
-                  aria-label="Name search"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </motion.div>
-            </motion.div>
-            <motion.div
-              className="w-full md:w-40"
-              layoutId="sex-select-container"
-            >
-              <motion.div layoutId="sex-select">
-                <Select value={sex} onValueChange={setSex}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="M">Male</SelectItem>
-                    <SelectItem value="F">Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </motion.div>
-            </motion.div>
+            {searchMode === "regular" ? (
+              <>
+                <motion.div className="w-full" layoutId="name-input-container">
+                  <motion.div layoutId="name-input">
+                    <Input
+                      type="text"
+                      placeholder="Enter a name"
+                      aria-label="Name search"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </motion.div>
+                </motion.div>
+                <motion.div
+                  className="w-full md:w-40"
+                  layoutId="sex-select-container"
+                >
+                  <motion.div layoutId="sex-select">
+                    <Select value={sex} onValueChange={setSex}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="M">Male</SelectItem>
+                        <SelectItem value="F">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                </motion.div>
+              </>
+            ) : searchMode === "gender" ? (
+              <>
+                <motion.div className="w-full" layoutId="name-input-container">
+                  <motion.div layoutId="name-input">
+                    <Input
+                      type="text"
+                      placeholder="Enter a name"
+                      aria-label="Name search"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </motion.div>
+                </motion.div>
+              </>
+            ) : searchMode === "popular" ? (
+              <>
+                <div className="w-full md:w-40">
+                  <Select value={popularYear} onValueChange={setPopularYear}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {popularYearOptions.map((y) => (
+                        <SelectItem key={y} value={y}>
+                          {y === "all" ? "All Time" : y}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="w-full md:w-40">
+                  <Select value={popularSex} onValueChange={setPopularSex}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select sex" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="M">Male</SelectItem>
+                      <SelectItem value="F">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-full md:w-1/3 grid grid-cols-2 gap-2">
+                  <motion.div layoutId="name-input-container">
+                    <motion.div layoutId="name-input">
+                      <Input
+                        type="text"
+                        placeholder="First name"
+                        aria-label="Name search"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </motion.div>
+                  </motion.div>
+                  <motion.div layoutId="sex-select-container">
+                    <motion.div layoutId="sex-select">
+                      <Select value={sex} onValueChange={setSex}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sex" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </motion.div>
+                  </motion.div>
+                </div>
+                <div className="w-full md:w-1/3 grid grid-cols-2 gap-2">
+                  <motion.div layoutId="name1-input-container">
+                    <motion.div layoutId="name1-input">
+                      <Input
+                        type="text"
+                        placeholder="Second name"
+                        aria-label="Second name search"
+                        value={name1}
+                        onChange={(e) => setName1(e.target.value)}
+                      />
+                    </motion.div>
+                  </motion.div>
+                  <motion.div layoutId="sex1-select-container">
+                    <motion.div layoutId="sex1-select">
+                      <Select value={sex1} onValueChange={setSex1}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sex" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </motion.div>
+                  </motion.div>
+                </div>
+              </>
+            )}
             <motion.div layoutId="search-button">
               <Button type="submit" disabled={isLoading}>
                 <motion.span
@@ -445,33 +1058,330 @@ ${data
                   exit={{ opacity: 0, filter: "blur(4px)" }}
                   transition={{ duration: 0.6 }}
                 >
-                  {isLoading ? "Searching..." : "Search"}
+                  {isLoading
+                    ? searchMode === "popular"
+                      ? "Loading..."
+                      : "Searching..."
+                    : searchMode === "compare"
+                      ? "Compare"
+                      : searchMode === "popular"
+                        ? "View Popular Names"
+                        : "Search"}
                 </motion.span>
               </Button>
             </motion.div>
           </form>
         </TopBar>
-        {data.length > 0 && (
-          <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
-            <Chart name={submittedName} sex={submittedSex} />
-            <Heatmap sex={submittedSex} name={submittedName} />
-            <>
-              <div>
-                <Actuary name={submittedName} sex={submittedSex} />
+        {(data.length > 0 ||
+          (searchMode === "popular" && popularData.length > 0)) &&
+          searchMode !== "popular" && (
+            <div className="pt-3 px-2 sm:pt-5 sm:px-9 grid grid-cols-1 gap-3 md:gap-2">
+              {searchMode === "compare" || searchMode === "gender" ? (
+                <CompareChart
+                  name={submittedName}
+                  sex={submittedSex}
+                  name1={
+                    searchMode === "gender" ? submittedName : submittedName1
+                  }
+                  sex1={searchMode === "gender" ? submittedSex1 : submittedSex1}
+                />
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
+                    <Chart name={submittedName} sex={submittedSex} />
+                    <Heatmap sex={submittedSex} name={submittedName} />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-2">
+                    <Actuary name={submittedName} sex={submittedSex} />
+                    <Numbers name={submittedName} sex={submittedSex} />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+        {searchMode === "popular" && (
+          <div className="flex-1 overflow-auto p-4">
+            {initialLoad && isLoading ? (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-muted-foreground">
+                  Loading popular names...
+                </p>
               </div>
-              <div>
-                <Numbers name={submittedName} sex={submittedSex} />
+            ) : popularData.length > 0 ? (
+              <div className="container mx-auto">
+                <h2 className="text-xl font-semibold mb-4">
+                  {popularYear === "all" ? "All Time" : popularYear}{" "}
+                  {popularSex === "M"
+                    ? "Male"
+                    : popularSex === "F"
+                      ? "Female"
+                      : ""}{" "}
+                  Names
+                </h2>
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background">
+                    <TableRow>
+                      <TableHead className="w-[80px]">Rank</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Sex</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {popularData.map((item, index) => (
+                      <TableRow
+                        key={index}
+                        ref={
+                          index === popularData.length - 10 ? lastItemRef : null
+                        }
+                      >
+                        <TableCell>{item.rank}</TableCell>
+                        <TableCell className="font-medium">
+                          <Link
+                            href={`/?name=${item.name}&sex=${item.sex}`}
+                            className="hover:underline text-primary"
+                          >
+                            {item.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          {item.sex === "M" ? "Male" : "Female"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.amount.toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {isLoading && !initialLoad && (
+                  <div className="py-4 text-center">
+                    <p className="text-muted-foreground">
+                      Loading more names...
+                    </p>
+                  </div>
+                )}
+                {!hasMore && (
+                  <div className="py-4 text-center">
+                    <p className="text-muted-foreground">
+                      No more names to load
+                    </p>
+                  </div>
+                )}
               </div>
-            </>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-muted-foreground">No popular names found</p>
+              </div>
+            )}
           </div>
         )}
-        <div className="flex-1 overflow-auto p-4">
-          {data.length > 0 ? (
+
+        {(searchMode === "compare" || searchMode === "gender") && (
+          <div className="md:hidden p-4 text-center">
+            <div className="bg-secondary/30 rounded-lg p-4">
+              <p className="text-muted-foreground">
+                Full data access is not compatible on mobile at the moment
+              </p>
+              <p className="text-xs mt-2">
+                Please view on a larger screen for detailed tables
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={
+            searchMode === "compare" || searchMode === "gender"
+              ? "hidden md:flex flex-row space-x-9 p-9"
+              : searchMode === "popular"
+                ? "hidden"
+                : "flex-1 overflow-auto p-4"
+          }
+        >
+          {searchMode === "compare" || searchMode === "gender" ? (
+            <>
+              <div className="flex-1 overflow-auto">
+                {data.length > 0 ? (
+                  <div className="container mx-auto">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-md font-medium pl-2">
+                        {submittedName} (
+                        {searchMode === "gender" ? "Male" : submittedSex})
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => diveDeeper(0)}
+                        >
+                          <SearchIcon size={16} />
+                          Dive Deeper
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center gap-2"
+                            >
+                              <Download size={16} />
+                              Export
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => exportToCsv(0)}>
+                              Download CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportToPdf(0)}>
+                              Download PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportToJson(0)}>
+                              Download JSON
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportToXml(0)}>
+                              Download XML
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-background">
+                        <TableRow>
+                          <TableHead className="w-[100px]">Name</TableHead>
+                          <TableHead>Sex</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead className="text-right">Year</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">
+                              {item.name}
+                            </TableCell>
+                            <TableCell>{item.sex}</TableCell>
+                            <TableCell>{item.amount}</TableCell>
+                            <TableCell className="text-right">
+                              {item.year}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="h-full flex items-center justify-center flex-col">
+                    <p className="text-muted-foreground">No results found</p>
+                    <p className="text-gray-400 text-sm">
+                      Years with under five occurances are not shown for privacy
+                      reasons
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 overflow-auto">
+                {data1.length > 0 ? (
+                  <div className="container mx-auto">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-md font-medium pl-2">
+                        {searchMode === "gender"
+                          ? submittedName + " (Female)"
+                          : submittedName1 + " (" + submittedSex1 + ")"}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => diveDeeper(1)}
+                        >
+                          <SearchIcon size={16} />
+                          Dive Deeper
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center gap-2"
+                            >
+                              <Download size={16} />
+                              Export
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => exportToCsv(1)}>
+                              Download CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportToPdf(1)}>
+                              Download PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportToJson(1)}>
+                              Download JSON
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportToXml(1)}>
+                              Download XML
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-background">
+                        <TableRow>
+                          <TableHead className="w-[100px]">Name</TableHead>
+                          <TableHead>Sex</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead className="text-right">Year</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data1.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">
+                              {item.name}
+                            </TableCell>
+                            <TableCell>{item.sex}</TableCell>
+                            <TableCell>{item.amount}</TableCell>
+                            <TableCell className="text-right">
+                              {item.year}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (searchMode as string) === "gender" ? (
+                  <div className="h-full flex items-center justify-center flex-col">
+                    <p className="text-muted-foreground">
+                      No results found for males
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      Years with under five occurances are not shown for privacy
+                      reasons
+                    </p>
+                  </div>
+                ) : (
+                  <div className="h-full flex items-center justify-center flex-col">
+                    <p className="text-muted-foreground">No results found</p>
+                    <p className="text-gray-400 text-sm">
+                      Years with under five occurances are not shown for privacy
+                      reasons
+                    </p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : data.length > 0 ? (
             <div className="container mx-auto">
               <div className="flex justify-end mb-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger>
-                    {" "}
                     <Button
                       variant="outline"
                       size="sm"
@@ -482,16 +1392,16 @@ ${data
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={exportToCsv}>
+                    <DropdownMenuItem onClick={() => exportToCsv(0)}>
                       Download CSV
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={exportToPdf}>
+                    <DropdownMenuItem onClick={() => exportToPdf(0)}>
                       Download PDF
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={exportToJson}>
+                    <DropdownMenuItem onClick={() => exportToJson(0)}>
                       Download JSON
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={exportToXml}>
+                    <DropdownMenuItem onClick={() => exportToXml(0)}>
                       Download XML
                     </DropdownMenuItem>
                   </DropdownMenuContent>
