@@ -2,8 +2,6 @@
 
 # ✍️ Nomen
 
-### A web viewer and parser for US citizen names.
-
 ##### A web viewer and parser for every name listed on a social security card between 1880-2024.
 
 [Nomen](https://nomen.sh) is a website that allows people to explore and visualize name data from the US Social Security Adminstration (SSA). You can search through names, compare them, see charts and use actuary data to see how many people with a given name are alive.
