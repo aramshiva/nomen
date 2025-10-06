@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ sex: "U", breakdown: {} });
     }
 
-    const total = rows.reduce((sum, r) => sum + r.amount, 0);
+    const total = parseFloat(rows.reduce((sum, r) => sum + r.amount, 0));
     const breakdown: Record<string, { amount: number }> = {};
     for (const r of rows) {
       breakdown[r.sex] = { amount: r.amount };
