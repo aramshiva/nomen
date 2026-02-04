@@ -60,7 +60,7 @@ export default function Numbers({ sex, name }: { sex: string; name: string }) {
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center h-full pb-2">
+        <CardContent className="flex flex-col items-center justify-center pb-2">
           <TooltipTrigger>
             <div className="w-[20rem] md:w-[25rem]">
               <p className="pt-5 fill-foreground text-3xl font-bold">
