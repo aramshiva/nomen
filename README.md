@@ -59,4 +59,4 @@ For detailed API documentation, see the [API README](/app/api/README.md).
 > This does **not** include any social security numbers. The only data stored is the name, frequency, sex, year born
 > This **is** public data given by the Social Security Administration. No PII is stored
 
-###### (Tabulated based on Social Security records as of May 5th, 2025), any person who registered for social security between 1880 and 2024 are on the dataset.
+###### (Tabulated based on Social Security records as of May 5th, 2025), any person who registered for social security between 1880 and 2025 are on the dataset.
