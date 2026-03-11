@@ -4,7 +4,7 @@
 
 ##### A web viewer and parser for every name listed on a social security card between 1880-2024.
 
-[Nomen](https://nomen.sh) is a website that allows people to explore and visualize name data from the US Social Security Adminstration (SSA). You can search through names, compare them, see charts and use actuary data to see how many people with a given name are alive.
+[Nomen](https://nomen.aram.sh) is a website that allows people to explore and visualize name data from the US Social Security Adminstration (SSA). You can search through names, compare them, see charts and use actuary data to see how many people with a given name are alive.
 
 The dataset is sourced from the [US Social Security Administration's Baby Names from Social Security Card Applications Dataset](https://catalog.data.gov/dataset/baby-names-from-social-security-card-applications-national-data) and the [US Social Security Adminstration's Actuarial Tables Dataset](https://www.ssa.gov/oact/STATS/table4c6.html).
 
