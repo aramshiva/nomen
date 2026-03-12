@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { DeprecationBanner } from "@/components/deprecation-banner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -52,6 +53,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <DeprecationBanner />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AnimatePresence>
             <TooltipProvider>{children}</TooltipProvider>
